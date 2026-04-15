@@ -26,6 +26,7 @@ externalPort = 8080
 [[ports]]
 localPort = 8081
 externalPort = 80
+<<<<<<< HEAD
 
 [[ports]]
 localPort = 8082
@@ -38,3 +39,5 @@ externalPort = 3000
 [[ports]]
 localPort = 23625
 externalPort = 3002
+=======
+>>>>>>> 7e209bf (Add a complete AI marketing campaign generator with visual storyboard capabilities)
