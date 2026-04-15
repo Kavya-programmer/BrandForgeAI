@@ -1,0 +1,111 @@
+Build a complete full-stack AI web application called:
+
+🚀 AI Marketing Agency OS
+
+This is a competition-ready AI SaaS product that generates full marketing campaigns, ad scripts, and AI video storyboards.
+
+---
+
+# 🎯 CORE IDEA
+
+The app is an AI marketing agency simulator.
+
+Users input:
+- Brand name
+- Product description
+- Target audience
+- Optional theme/style (luxury, Gen Z viral, corporate, emotional, cinematic, etc.)
+
+Then the AI generates a full marketing package.
+
+---
+
+# 🧠 FEATURES REQUIRED
+
+## 1. AI Marketing Generator
+Generate:
+- Campaign Idea
+- Marketing Strategy (viral plan)
+- Ad Script (scene-by-scene video ad)
+- Social Media captions (Instagram + TikTok + hashtags)
+
+## 2. Theme Engine (VERY IMPORTANT)
+User can select or type a theme:
+- Luxury / “Emily in Paris” style
+- Gen Z viral TikTok
+- Corporate professional
+- Emotional storytelling
+- Minimal Apple-style ads
+- High energy sports marketing
+
+AI output must adapt to the theme completely.
+
+---
+
+## 3. AI VIDEO SIMULATION MODULE
+Even if real video generation is not available, generate:
+- storyboard scenes
+- visual descriptions
+- camera angles
+- timing (15–60 sec ad format)
+- prompts for tools like Runway / Pika / Sora
+
+---
+
+# 💻 TECH STACK (IMPORTANT)
+
+Use:
+- Frontend: clean modern SaaS UI (React or simple HTML/CSS)
+- Backend: Flask (Python) or Node.js (choose best working option)
+- AI: Groq API (Llama 3.1 or 3.3 model)
+- Keep architecture simple and fully working
+
+---
+
+# 🎨 UI REQUIREMENTS
+
+Make it look like a real startup SaaS product:
+
+- dark mode professional dashboard
+- left input panel
+- right output panel
+- clean cards for each section
+- modern fonts and spacing
+- main CTA button: “Generate Campaign”
+
+---
+
+# 🏆 COMPETITION FEATURES
+
+Must include:
+- One-click full campaign generation
+- Theme selector dropdown
+- Structured output sections
+- Beautiful UI (VERY IMPORTANT)
+- Demo-friendly flow
+
+---
+
+# 🎥 OUTPUT FORMAT
+
+AI response must always be structured like:
+
+🎯 Campaign Idea
+🧠 Strategy
+🎬 Ad Script
+📱 Social Media Content
+🎥 Video Storyboard
+
+---
+
+# ⚡ GOAL
+
+This must feel like a real AI startup product that could be launched.
+
+It should be:
+- visually impressive
+- functional
+- demo-ready
+- competition-winning level
+
+Generate full working code + file structure + instructions to run.
