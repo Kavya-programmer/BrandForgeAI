@@ -3,22 +3,20 @@
  * Do not edit manually.
  * Api
  * API specification
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
+import type { AdsFactory } from "./adsFactory";
 
 export interface CampaignResult {
-  /** The core campaign concept */
   campaignIdea: string;
-  /** Viral marketing strategy */
   strategy: string;
-  /** Scene-by-scene video ad script */
   adScript: string;
-  /** Instagram and TikTok captions with hashtags */
   socialContent: string;
-  /** Video storyboard with scenes, camera angles, and timing */
   videoStoryboard: string;
-  /** The theme used for this campaign */
+  viralityScore: number;
+  viralityExplanation: string;
+  estimatedViews: string;
+  adsFactory: AdsFactory;
   theme: string;
-  /** The brand name */
   brand: string;
 }

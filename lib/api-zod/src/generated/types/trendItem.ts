@@ -5,8 +5,10 @@
  * API specification
  * OpenAPI spec version: 0.2.0
  */
-import type { Theme } from "./theme";
 
-export interface ThemeList {
-  themes: Theme[];
+export interface TrendItem {
+  trend: string;
+  platform: string;
+  virality: string;
+  howToUse: string;
 }

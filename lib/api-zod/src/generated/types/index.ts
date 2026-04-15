@@ -3,12 +3,23 @@
  * Do not edit manually.
  * Api
  * API specification
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
+export * from "./adsFactory";
+export * from "./adsFactoryHashtagSets";
+export * from "./brandColor";
+export * from "./brandResult";
 export * from "./campaignResult";
 export * from "./errorResponse";
 export * from "./generateCampaignBody";
 export * from "./healthStatus";
+export * from "./influencerResult";
+export * from "./strategyResult";
 export * from "./theme";
 export * from "./themeList";
+export * from "./trendItem";
+export * from "./trendStealerResult";
+export * from "./videoPlanResult";
+export * from "./videoScene";
+export * from "./videoVersions";

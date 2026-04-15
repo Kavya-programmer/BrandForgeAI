@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
-  version: 0.1.0
+  version: 0.2.0
   description: API specification
 servers:
   - url: /api
@@ -18,7 +18,6 @@ paths:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -26,12 +25,25 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /campaign/themes:
+    get:
+      operationId: getThemes
+      tags: [campaign]
+      summary: Get available campaign themes
+      responses:
+        "200":
+          description: List of themes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThemeList"
+
   /campaign/generate:
     post:
       operationId: generateCampaign
       tags: [campaign]
-      summary: Generate a full AI marketing campaign
-      description: Uses Groq AI to generate a complete marketing campaign including strategy, ad script, social content, and video storyboard
+      summary: Generate a full AI marketing campaign package
       requestBody:
         required: true
         content:
@@ -40,7 +52,7 @@ paths:
               $ref: "#/components/schemas/GenerateCampaignBody"
       responses:
         "200":
-          description: Successfully generated campaign
+          description: Full campaign package
           content:
             application/json:
               schema:
@@ -57,19 +69,131 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-  /campaign/themes:
-    get:
-      operationId: getThemes
+
+  /campaign/generate-strategy:
+    post:
+      operationId: generateStrategy
       tags: [campaign]
-      summary: Get available campaign themes
-      description: Returns list of available marketing campaign themes
+      summary: Generate a deep marketing strategy with virality engine
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateCampaignBody"
       responses:
         "200":
-          description: List of themes
+          description: Deep strategy result
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ThemeList"
+                $ref: "#/components/schemas/StrategyResult"
+        "500":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /campaign/generate-video-plan:
+    post:
+      operationId: generateVideoPlan
+      tags: [campaign]
+      summary: Generate a 1-Click Ads Factory video production plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateCampaignBody"
+      responses:
+        "200":
+          description: Full video production plan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VideoPlanResult"
+        "500":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /campaign/generate-brand:
+    post:
+      operationId: generateBrand
+      tags: [campaign]
+      summary: Generate a complete brand identity system
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateCampaignBody"
+      responses:
+        "200":
+          description: Brand identity package
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BrandResult"
+        "500":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /campaign/generate-influencer:
+    post:
+      operationId: generateInfluencer
+      tags: [campaign]
+      summary: Generate an AI influencer persona for the campaign
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateCampaignBody"
+      responses:
+        "200":
+          description: Influencer persona
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InfluencerResult"
+        "500":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /campaign/trend-stealer:
+    post:
+      operationId: trendStealer
+      tags: [campaign]
+      summary: Trend Stealer Mode - adapts campaign to current viral trends
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateCampaignBody"
+      responses:
+        "200":
+          description: Trend-adapted campaign
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrendStealerResult"
+        "500":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
 components:
   schemas:
@@ -78,62 +202,331 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
     GenerateCampaignBody:
       type: object
       properties:
         brand:
           type: string
-          description: Brand name
         product:
           type: string
-          description: Product or service description
         audience:
           type: string
-          description: Target audience description
         theme:
           type: string
-          description: Campaign theme/style (e.g. luxury, Gen Z viral, corporate)
-      required:
-        - brand
-        - product
-        - audience
-        - theme
+      required: [brand, product, audience, theme]
 
     CampaignResult:
       type: object
       properties:
         campaignIdea:
           type: string
-          description: The core campaign concept
         strategy:
           type: string
-          description: Viral marketing strategy
         adScript:
           type: string
-          description: Scene-by-scene video ad script
         socialContent:
           type: string
-          description: Instagram and TikTok captions with hashtags
         videoStoryboard:
           type: string
-          description: Video storyboard with scenes, camera angles, and timing
+        viralityScore:
+          type: number
+        viralityExplanation:
+          type: string
+        estimatedViews:
+          type: string
+        adsFactory:
+          $ref: "#/components/schemas/AdsFactory"
         theme:
           type: string
-          description: The theme used for this campaign
         brand:
           type: string
-          description: The brand name
       required:
         - campaignIdea
         - strategy
         - adScript
         - socialContent
         - videoStoryboard
+        - viralityScore
+        - viralityExplanation
+        - estimatedViews
+        - adsFactory
         - theme
         - brand
+
+    AdsFactory:
+      type: object
+      properties:
+        thumbnailPrompt:
+          type: string
+        bestPostingTimes:
+          type: array
+          items:
+            type: string
+        platforms:
+          type: array
+          items:
+            type: string
+        hashtagSets:
+          type: object
+          properties:
+            instagram:
+              type: array
+              items:
+                type: string
+            tiktok:
+              type: array
+              items:
+                type: string
+      required: [thumbnailPrompt, bestPostingTimes, platforms, hashtagSets]
+
+    StrategyResult:
+      type: object
+      properties:
+        positioning:
+          type: string
+        audiencePsychology:
+          type: string
+        viralHooks:
+          type: array
+          items:
+            type: string
+        sloganIdeas:
+          type: array
+          items:
+            type: string
+        platformStrategy:
+          type: string
+        competitorAngle:
+          type: string
+        viralityScore:
+          type: number
+        viralityExplanation:
+          type: string
+        estimatedViews:
+          type: string
+      required:
+        - positioning
+        - audiencePsychology
+        - viralHooks
+        - sloganIdeas
+        - platformStrategy
+        - competitorAngle
+        - viralityScore
+        - viralityExplanation
+        - estimatedViews
+
+    VideoPlanResult:
+      type: object
+      properties:
+        script:
+          type: string
+        scenes:
+          type: array
+          items:
+            $ref: "#/components/schemas/VideoScene"
+        voiceover:
+          type: string
+        musicStyle:
+          type: string
+        editingStyle:
+          type: string
+        captionsText:
+          type: string
+        thumbnailPrompt:
+          type: string
+        runwayPrompt:
+          type: string
+        pikaPrompt:
+          type: string
+        heygen_prompt:
+          type: string
+        versions:
+          $ref: "#/components/schemas/VideoVersions"
+      required:
+        - script
+        - scenes
+        - voiceover
+        - musicStyle
+        - editingStyle
+        - captionsText
+        - thumbnailPrompt
+        - runwayPrompt
+        - pikaPrompt
+        - heygen_prompt
+        - versions
+
+    VideoScene:
+      type: object
+      properties:
+        sceneNumber:
+          type: number
+        duration:
+          type: string
+        visual:
+          type: string
+        cameraAngle:
+          type: string
+        audio:
+          type: string
+        textOverlay:
+          type: string
+      required: [sceneNumber, duration, visual, cameraAngle, audio, textOverlay]
+
+    VideoVersions:
+      type: object
+      properties:
+        tiktokViral:
+          type: string
+        luxuryCinematic:
+          type: string
+        memeVersion:
+          type: string
+      required: [tiktokViral, luxuryCinematic, memeVersion]
+
+    BrandResult:
+      type: object
+      properties:
+        colorPalette:
+          type: array
+          items:
+            $ref: "#/components/schemas/BrandColor"
+        fontPairings:
+          type: array
+          items:
+            type: string
+        logoConceptDescription:
+          type: string
+        aestheticDirection:
+          type: string
+        moodboardKeywords:
+          type: array
+          items:
+            type: string
+        brandVoice:
+          type: string
+        tagline:
+          type: string
+        brandArchetype:
+          type: string
+      required:
+        - colorPalette
+        - fontPairings
+        - logoConceptDescription
+        - aestheticDirection
+        - moodboardKeywords
+        - brandVoice
+        - tagline
+        - brandArchetype
+
+    BrandColor:
+      type: object
+      properties:
+        name:
+          type: string
+        hex:
+          type: string
+        usage:
+          type: string
+      required: [name, hex, usage]
+
+    InfluencerResult:
+      type: object
+      properties:
+        name:
+          type: string
+        handle:
+          type: string
+        age:
+          type: number
+        location:
+          type: string
+        bio:
+          type: string
+        aesthetic:
+          type: string
+        contentStyle:
+          type: string
+        audienceSize:
+          type: string
+        platforms:
+          type: array
+          items:
+            type: string
+        contentPillars:
+          type: array
+          items:
+            type: string
+        sampleCaptions:
+          type: array
+          items:
+            type: string
+        brandCollabAngle:
+          type: string
+        characterStory:
+          type: string
+      required:
+        - name
+        - handle
+        - age
+        - location
+        - bio
+        - aesthetic
+        - contentStyle
+        - audienceSize
+        - platforms
+        - contentPillars
+        - sampleCaptions
+        - brandCollabAngle
+        - characterStory
+
+    TrendStealerResult:
+      type: object
+      properties:
+        currentTrends:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrendItem"
+        adaptedCampaign:
+          type: string
+        trendHooks:
+          type: array
+          items:
+            type: string
+        viralFormula:
+          type: string
+        soundSuggestions:
+          type: array
+          items:
+            type: string
+        timingAdvice:
+          type: string
+        predictedPlatforms:
+          type: array
+          items:
+            type: string
+      required:
+        - currentTrends
+        - adaptedCampaign
+        - trendHooks
+        - viralFormula
+        - soundSuggestions
+        - timingAdvice
+        - predictedPlatforms
+
+    TrendItem:
+      type: object
+      properties:
+        trend:
+          type: string
+        platform:
+          type: string
+        virality:
+          type: string
+        howToUse:
+          type: string
+      required: [trend, platform, virality, howToUse]
 
     ThemeList:
       type: object
@@ -142,8 +535,7 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Theme"
-      required:
-        - themes
+      required: [themes]
 
     Theme:
       type: object
@@ -154,15 +546,11 @@ components:
           type: string
         description:
           type: string
-      required:
-        - id
-        - label
-        - description
+      required: [id, label, description]
 
     ErrorResponse:
       type: object
       properties:
         error:
           type: string
-      required:
-        - error
+      required: [error]

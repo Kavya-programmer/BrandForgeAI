@@ -1,0 +1,491 @@
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Copy, CheckCircle2, TrendingUp, Target, Video, PenTool, Hash, Activity } from "lucide-react";
+
+export function CampaignTabs({ activeTab, setActiveTab, data }: { activeTab: string, setActiveTab: (v: string) => void, data: any }) {
+  
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+  };
+
+  return (
+    <div className="flex flex-col h-full relative z-10">
+      <div className="px-8 pt-8 pb-4 border-b border-white/10 bg-black/40 backdrop-blur-md">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="bg-transparent border border-white/10 h-12 p-1 rounded-xl gap-1 overflow-x-auto w-full justify-start hide-scrollbar">
+            <TabsTrigger value="campaign" disabled={!data.campaign} className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-black data-[disabled]:opacity-30">
+              <Activity className="w-4 h-4 mr-2" /> Campaign
+            </TabsTrigger>
+            <TabsTrigger value="viral" disabled={!data.campaign && !data.strategy} className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-black data-[disabled]:opacity-30">
+              <TrendingUp className="w-4 h-4 mr-2" /> Viral Score
+            </TabsTrigger>
+            <TabsTrigger value="strategy" disabled={!data.strategy && !data.campaign} className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-black data-[disabled]:opacity-30">
+              <Target className="w-4 h-4 mr-2" /> Strategy
+            </TabsTrigger>
+            <TabsTrigger value="video" disabled={!data.video && !data.campaign} className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-black data-[disabled]:opacity-30">
+              <Video className="w-4 h-4 mr-2" /> Video
+            </TabsTrigger>
+            <TabsTrigger value="brand" disabled={!data.brand && !data.campaign} className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-black data-[disabled]:opacity-30">
+              <PenTool className="w-4 h-4 mr-2" /> Brand
+            </TabsTrigger>
+            <TabsTrigger value="influencer" disabled={!data.influencer && !data.campaign} className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-black data-[disabled]:opacity-30">
+              <Hash className="w-4 h-4 mr-2" /> Influencer
+            </TabsTrigger>
+            <TabsTrigger value="trends" disabled={!data.trends && !data.campaign} className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-black data-[disabled]:opacity-30">
+              <TrendingUp className="w-4 h-4 mr-2" /> Trends
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-8 hide-scrollbar">
+        
+        {/* CAMPAIGN TAB */}
+        {activeTab === "campaign" && data.campaign && (
+          <motion.div variants={container} initial="hidden" animate="show" className="max-w-4xl mx-auto space-y-6">
+            <motion.div variants={item}>
+              <Card className="bg-black border-white/10 overflow-hidden">
+                <CardHeader className="border-b border-white/5 bg-white/[0.02]">
+                  <CardTitle className="text-white/80 uppercase text-xs tracking-widest">Campaign Idea</CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <p className="text-xl leading-relaxed font-medium text-white/90">{data.campaign.campaignIdea}</p>
+                </CardContent>
+              </Card>
+            </motion.div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <motion.div variants={item}>
+                <Card className="bg-black border-white/10 h-full">
+                  <CardHeader className="border-b border-white/5 bg-white/[0.02]">
+                    <CardTitle className="text-white/80 uppercase text-xs tracking-widest">Core Strategy</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <p className="text-white/70 leading-relaxed whitespace-pre-wrap">{data.campaign.strategy}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+              
+              <motion.div variants={item}>
+                <Card className="bg-black border-white/10 h-full">
+                  <CardHeader className="border-b border-white/5 bg-white/[0.02]">
+                    <CardTitle className="text-white/80 uppercase text-xs tracking-widest">Social Content</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <p className="text-white/70 leading-relaxed whitespace-pre-wrap">{data.campaign.socialContent}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
+
+            <motion.div variants={item}>
+              <Card className="bg-black border-white/10 overflow-hidden">
+                <CardHeader className="border-b border-white/5 bg-white/[0.02]">
+                  <CardTitle className="text-white/80 uppercase text-xs tracking-widest">Ad Script</CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <pre className="font-mono text-sm text-white/70 whitespace-pre-wrap leading-relaxed bg-white/5 p-4 rounded-lg">{data.campaign.adScript}</pre>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* VIRAL SCORE TAB */}
+        {activeTab === "viral" && (data.campaign || data.strategy) && (
+          <motion.div variants={container} initial="hidden" animate="show" className="max-w-4xl mx-auto space-y-8">
+            <motion.div variants={item} className="flex flex-col items-center justify-center p-12 bg-black border border-white/10 rounded-2xl relative overflow-hidden">
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent opacity-50" />
+              
+              <div className="relative z-10 flex flex-col items-center">
+                <h3 className="text-white/60 uppercase tracking-widest text-sm mb-4">Predicted Virality</h3>
+                <div className="text-8xl font-medium tracking-tighter text-white mb-2">
+                  {(data.campaign || data.strategy).viralityScore}
+                  <span className="text-4xl text-white/40">/100</span>
+                </div>
+                <div className="flex items-center gap-2 text-white/80 mt-4 bg-white/10 px-4 py-2 rounded-full backdrop-blur-md border border-white/5">
+                  <TrendingUp className="w-5 h-5" />
+                  <span className="font-medium">{(data.campaign || data.strategy).estimatedViews}</span>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div variants={item}>
+              <Card className="bg-black border-white/10">
+                <CardContent className="p-8">
+                  <p className="text-xl text-white/80 leading-relaxed font-medium">{(data.campaign || data.strategy).viralityExplanation}</p>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {(data.campaign?.adsFactory) && (
+              <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card className="bg-black border-white/10">
+                  <CardHeader>
+                    <CardTitle className="text-white/80 uppercase text-xs tracking-widest">Platforms & Timing</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6 pt-0 space-y-6">
+                    <div>
+                      <div className="flex flex-wrap gap-2">
+                        {data.campaign.adsFactory.platforms.map((p: string, i: number) => (
+                          <Badge key={i} variant="outline" className="border-white/20 bg-white/5 text-white px-3 py-1 rounded-full">{p}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="text-white/50 text-xs uppercase tracking-wider mb-3">Best Posting Times</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {data.campaign.adsFactory.bestPostingTimes.map((t: string, i: number) => (
+                          <div key={i} className="bg-white/10 text-white/90 text-sm px-3 py-1.5 rounded font-mono border border-white/5">{t}</div>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-black border-white/10">
+                  <CardHeader>
+                    <CardTitle className="text-white/80 uppercase text-xs tracking-widest">Hashtag Strategy</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6 pt-0 space-y-6">
+                    {data.campaign.adsFactory.hashtagSets.instagram && (
+                      <div>
+                        <h4 className="text-white/50 text-xs uppercase tracking-wider mb-3">Instagram</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {data.campaign.adsFactory.hashtagSets.instagram.map((h: string, i: number) => (
+                            <span key={i} className="text-white/70 text-sm">#{h}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {data.campaign.adsFactory.hashtagSets.tiktok && (
+                      <div>
+                        <h4 className="text-white/50 text-xs uppercase tracking-wider mb-3">TikTok</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {data.campaign.adsFactory.hashtagSets.tiktok.map((h: string, i: number) => (
+                            <span key={i} className="text-white/70 text-sm">#{h}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+
+        {/* STRATEGY TAB */}
+        {activeTab === "strategy" && (data.strategy || data.campaign) && (
+          <motion.div variants={container} initial="hidden" animate="show" className="max-w-4xl mx-auto space-y-8">
+            <motion.div variants={item}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="p-8 bg-black border border-white/10 rounded-2xl">
+                  <h3 className="text-white/50 text-xs uppercase tracking-wider mb-4">Positioning</h3>
+                  <p className="text-lg text-white/90 font-medium">{(data.strategy || data.campaign).positioning || "Strategy data not fully available. Regenerate Deep Strategy."}</p>
+                </div>
+                <div className="p-8 bg-black border border-white/10 rounded-2xl">
+                  <h3 className="text-white/50 text-xs uppercase tracking-wider mb-4">Audience Psychology</h3>
+                  <p className="text-lg text-white/90 font-medium">{(data.strategy || data.campaign).audiencePsychology || "Strategy data not fully available."}</p>
+                </div>
+              </div>
+            </motion.div>
+
+            {(data.strategy?.viralHooks) && (
+              <motion.div variants={item}>
+                <h3 className="text-white/50 text-xs uppercase tracking-wider mb-4 px-2">Viral Hooks</h3>
+                <div className="space-y-3">
+                  {data.strategy.viralHooks.map((hook: string, i: number) => (
+                    <div key={i} className="p-5 bg-white/5 border border-white/10 rounded-xl flex items-start gap-4">
+                      <div className="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center font-mono shrink-0">{i+1}</div>
+                      <p className="text-white/90 font-medium pt-1 text-lg">{hook}</p>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {(data.strategy?.sloganIdeas) && (
+              <motion.div variants={item}>
+                <h3 className="text-white/50 text-xs uppercase tracking-wider mb-4 px-2">Slogan Ideas</h3>
+                <div className="flex flex-wrap gap-4">
+                  {data.strategy.sloganIdeas.map((slogan: string, i: number) => (
+                    <div key={i} className="px-6 py-4 bg-white text-black font-medium rounded-full text-lg tracking-tight">
+                      "{slogan}"
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+
+        {/* VIDEO TAB */}
+        {activeTab === "video" && data.video && (
+          <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl mx-auto space-y-12">
+            <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="p-6 bg-black border border-white/10 rounded-2xl">
+                <h3 className="text-white/50 text-xs uppercase tracking-wider mb-2">Music Style</h3>
+                <p className="text-white/90">{data.video.musicStyle}</p>
+              </div>
+              <div className="p-6 bg-black border border-white/10 rounded-2xl">
+                <h3 className="text-white/50 text-xs uppercase tracking-wider mb-2">Editing Style</h3>
+                <p className="text-white/90">{data.video.editingStyle}</p>
+              </div>
+            </motion.div>
+
+            <motion.div variants={item}>
+              <h3 className="text-white/50 text-xs uppercase tracking-wider mb-4 px-2">Storyboard</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                {data.video.scenes.map((scene: any, i: number) => (
+                  <div key={i} className="bg-black border border-white/10 rounded-xl overflow-hidden flex flex-col h-full">
+                    <div className="aspect-video bg-white/5 border-b border-white/10 flex items-center justify-center p-4 relative">
+                      <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-white/80 text-[10px] px-2 py-1 rounded font-mono">
+                        {scene.duration}
+                      </div>
+                      <p className="text-xs text-center text-white/60">{scene.visual}</p>
+                    </div>
+                    <div className="p-4 flex-1 flex flex-col gap-3">
+                      <div>
+                        <span className="text-[10px] text-white/40 uppercase tracking-widest block mb-1">Camera</span>
+                        <p className="text-xs text-white/80">{scene.cameraAngle}</p>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-white/40 uppercase tracking-widest block mb-1">Audio</span>
+                        <p className="text-xs text-white/80">{scene.audio}</p>
+                      </div>
+                      {scene.textOverlay && (
+                        <div className="mt-auto pt-3 border-t border-white/5">
+                          <p className="text-xs font-mono text-white bg-white/10 px-2 py-1 rounded text-center">"{scene.textOverlay}"</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            <motion.div variants={item}>
+              <h3 className="text-white/50 text-xs uppercase tracking-wider mb-4 px-2">AI Prompts</h3>
+              <div className="space-y-4">
+                {[
+                  { name: 'Runway Gen-2', prompt: data.video.runwayPrompt },
+                  { name: 'Pika Labs', prompt: data.video.pikaPrompt },
+                  { name: 'HeyGen', prompt: data.video.heygen_prompt }
+                ].map((tool, i) => (
+                  <div key={i} className="bg-black border border-white/10 rounded-xl p-4 flex gap-4 items-start">
+                    <div className="w-24 shrink-0 font-medium text-white/80 pt-1">{tool.name}</div>
+                    <div className="flex-1 font-mono text-sm text-white/60 bg-white/5 p-3 rounded">{tool.prompt}</div>
+                    <CopyButton text={tool.prompt} />
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* BRAND TAB */}
+        {activeTab === "brand" && data.brand && (
+          <motion.div variants={container} initial="hidden" animate="show" className="max-w-4xl mx-auto space-y-12">
+            <motion.div variants={item} className="text-center py-12">
+              <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-white mb-6">"{data.brand.tagline}"</h2>
+              <div className="flex items-center justify-center gap-4 text-white/60">
+                <span className="uppercase tracking-widest text-sm">{data.brand.brandArchetype}</span>
+                <span>•</span>
+                <span className="uppercase tracking-widest text-sm">{data.brand.brandVoice}</span>
+              </div>
+            </motion.div>
+
+            <motion.div variants={item}>
+              <h3 className="text-white/50 text-xs uppercase tracking-wider mb-6">Color Palette</h3>
+              <div className="flex flex-wrap gap-4">
+                {data.brand.colorPalette.map((color: any, i: number) => (
+                  <div key={i} className="flex-1 min-w-[120px] group cursor-pointer">
+                    <div 
+                      className="h-32 rounded-xl mb-3 shadow-lg border border-white/5 transition-transform group-hover:-translate-y-1"
+                      style={{ backgroundColor: color.hex }}
+                    />
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="font-medium text-white/90">{color.name}</span>
+                      <span className="font-mono text-xs text-white/50">{color.hex}</span>
+                    </div>
+                    <p className="text-xs text-white/50">{color.usage}</p>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <motion.div variants={item} className="p-8 bg-black border border-white/10 rounded-2xl">
+                <h3 className="text-white/50 text-xs uppercase tracking-wider mb-4">Typography</h3>
+                <div className="space-y-4">
+                  {data.brand.fontPairings.map((font: string, i: number) => (
+                    <div key={i} className="text-2xl font-medium text-white/90">{font}</div>
+                  ))}
+                </div>
+              </motion.div>
+              
+              <motion.div variants={item} className="p-8 bg-black border border-white/10 rounded-2xl">
+                <h3 className="text-white/50 text-xs uppercase tracking-wider mb-4">Moodboard</h3>
+                <div className="flex flex-wrap gap-2">
+                  {data.brand.moodboardKeywords.map((word: string, i: number) => (
+                    <Badge key={i} variant="outline" className="bg-white/5 border-white/10 text-white/80 py-1.5 px-3">{word}</Badge>
+                  ))}
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* INFLUENCER TAB */}
+        {activeTab === "influencer" && data.influencer && (
+          <motion.div variants={container} initial="hidden" animate="show" className="max-w-4xl mx-auto space-y-8">
+            <motion.div variants={item} className="bg-black border border-white/10 rounded-3xl overflow-hidden flex flex-col md:flex-row">
+              <div className="w-full md:w-1/3 bg-white/5 p-8 flex flex-col items-center justify-center text-center border-r border-white/10">
+                <div className="w-32 h-32 rounded-full bg-gradient-to-tr from-white/20 to-white/5 border border-white/20 mb-6 flex items-center justify-center">
+                  <Hash className="w-12 h-12 text-white/40" />
+                </div>
+                <h2 className="text-2xl font-bold text-white mb-1">{data.influencer.name}</h2>
+                <p className="text-white/60 font-mono text-sm mb-4">{data.influencer.handle}</p>
+                <div className="flex flex-wrap justify-center gap-2 mb-6">
+                  <Badge className="bg-white/10 hover:bg-white/10 text-white">{data.influencer.age}y</Badge>
+                  <Badge className="bg-white/10 hover:bg-white/10 text-white">{data.influencer.location}</Badge>
+                </div>
+                <div className="mt-auto">
+                  <div className="text-3xl font-bold tracking-tight text-white mb-1">{data.influencer.audienceSize}</div>
+                  <div className="text-xs text-white/50 uppercase tracking-widest">Est. Audience</div>
+                </div>
+              </div>
+              <div className="w-full md:w-2/3 p-8 md:p-12 space-y-8">
+                <div>
+                  <h3 className="text-white/50 text-xs uppercase tracking-wider mb-2">Bio</h3>
+                  <p className="text-lg text-white/90 leading-relaxed">{data.influencer.bio}</p>
+                </div>
+                <div>
+                  <h3 className="text-white/50 text-xs uppercase tracking-wider mb-3">Content Pillars</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {data.influencer.contentPillars.map((pillar: string, i: number) => (
+                      <span key={i} className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white/80">{pillar}</span>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-white/50 text-xs uppercase tracking-wider mb-3">Character Story</h3>
+                  <p className="text-white/70 leading-relaxed">{data.influencer.characterStory}</p>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div variants={item}>
+              <h3 className="text-white/50 text-xs uppercase tracking-wider mb-4 px-2">Sample Content</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {data.influencer.sampleCaptions.map((caption: string, i: number) => (
+                  <Card key={i} className="bg-black border-white/10">
+                    <CardContent className="p-6">
+                      <p className="text-white/80 text-sm whitespace-pre-wrap">{caption}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* TRENDS TAB */}
+        {activeTab === "trends" && data.trends && (
+          <motion.div variants={container} initial="hidden" animate="show" className="max-w-4xl mx-auto space-y-8">
+            <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {data.trends.currentTrends.map((trend: any, i: number) => (
+                <Card key={i} className="bg-black border-white/10 overflow-hidden group hover:border-white/30 transition-colors">
+                  <CardContent className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <Badge variant="outline" className="border-white/20 text-white/80">{trend.platform}</Badge>
+                      <Badge className="bg-white text-black hover:bg-white">{trend.virality}</Badge>
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">{trend.trend}</h3>
+                    <p className="text-white/60 text-sm leading-relaxed">{trend.howToUse}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </motion.div>
+
+            <motion.div variants={item} className="p-8 bg-black border border-white/10 rounded-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-8 opacity-10">
+                <TrendingUp className="w-32 h-32 text-white" />
+              </div>
+              <div className="relative z-10">
+                <h3 className="text-white/50 text-xs uppercase tracking-wider mb-4">Adapted Campaign Concept</h3>
+                <p className="text-2xl font-medium text-white/90 leading-tight max-w-2xl">{data.trends.adaptedCampaign}</p>
+              </div>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <motion.div variants={item}>
+                <h3 className="text-white/50 text-xs uppercase tracking-wider mb-4 px-2">Trend Hooks</h3>
+                <div className="space-y-3">
+                  {data.trends.trendHooks.map((hook: string, i: number) => (
+                    <div key={i} className="p-4 bg-black border border-white/10 rounded-xl text-white/80">{hook}</div>
+                  ))}
+                </div>
+              </motion.div>
+              
+              <motion.div variants={item} className="space-y-8">
+                <div>
+                  <h3 className="text-white/50 text-xs uppercase tracking-wider mb-4 px-2">Viral Formula</h3>
+                  <div className="p-6 bg-white/5 rounded-xl border border-white/10 text-white/90 font-mono text-sm leading-relaxed">
+                    {data.trends.viralFormula}
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-white/50 text-xs uppercase tracking-wider mb-4 px-2">Trending Sounds</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {data.trends.soundSuggestions.map((sound: string, i: number) => (
+                      <Badge key={i} variant="outline" className="border-white/20 bg-black text-white/80 py-1.5 px-3">🎵 {sound}</Badge>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+
+      </div>
+    </div>
+  );
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const { toast } = useToast();
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    toast({ title: "Copied to clipboard" });
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <Button 
+      variant="ghost" 
+      size="icon" 
+      onClick={handleCopy}
+      className="text-white/50 hover:text-white hover:bg-white/10 h-8 w-8 shrink-0"
+    >
+      {copied ? <CheckCircle2 className="w-4 h-4 text-white" /> : <Copy className="w-4 h-4" />}
+    </Button>
+  );
+}

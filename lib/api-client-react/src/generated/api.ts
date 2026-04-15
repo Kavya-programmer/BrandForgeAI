@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Api
  * API specification
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
@@ -17,11 +17,16 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  BrandResult,
   CampaignResult,
   ErrorResponse,
   GenerateCampaignBody,
   HealthStatus,
+  InfluencerResult,
+  StrategyResult,
   ThemeList,
+  TrendStealerResult,
+  VideoPlanResult,
 } from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
@@ -34,7 +39,6 @@ type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 /**
- * Returns server health status
  * @summary Health check
  */
 export const getHealthCheckUrl = () => {
@@ -110,94 +114,6 @@ export function useHealthCheck<
 }
 
 /**
- * Uses Groq AI to generate a complete marketing campaign including strategy, ad script, social content, and video storyboard
- * @summary Generate a full AI marketing campaign
- */
-export const getGenerateCampaignUrl = () => {
-  return `/api/campaign/generate`;
-};
-
-export const generateCampaign = async (
-  generateCampaignBody: GenerateCampaignBody,
-  options?: RequestInit,
-): Promise<CampaignResult> => {
-  return customFetch<CampaignResult>(getGenerateCampaignUrl(), {
-    ...options,
-    method: "POST",
-    headers: { "Content-Type": "application/json", ...options?.headers },
-    body: JSON.stringify(generateCampaignBody),
-  });
-};
-
-export const getGenerateCampaignMutationOptions = <
-  TError = ErrorType<ErrorResponse>,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof generateCampaign>>,
-    TError,
-    { data: BodyType<GenerateCampaignBody> },
-    TContext
-  >;
-  request?: SecondParameter<typeof customFetch>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof generateCampaign>>,
-  TError,
-  { data: BodyType<GenerateCampaignBody> },
-  TContext
-> => {
-  const mutationKey = ["generateCampaign"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof generateCampaign>>,
-    { data: BodyType<GenerateCampaignBody> }
-  > = (props) => {
-    const { data } = props ?? {};
-
-    return generateCampaign(data, requestOptions);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type GenerateCampaignMutationResult = NonNullable<
-  Awaited<ReturnType<typeof generateCampaign>>
->;
-export type GenerateCampaignMutationBody = BodyType<GenerateCampaignBody>;
-export type GenerateCampaignMutationError = ErrorType<ErrorResponse>;
-
-/**
- * @summary Generate a full AI marketing campaign
- */
-export const useGenerateCampaign = <
-  TError = ErrorType<ErrorResponse>,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof generateCampaign>>,
-    TError,
-    { data: BodyType<GenerateCampaignBody> },
-    TContext
-  >;
-  request?: SecondParameter<typeof customFetch>;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof generateCampaign>>,
-  TError,
-  { data: BodyType<GenerateCampaignBody> },
-  TContext
-> => {
-  return useMutation(getGenerateCampaignMutationOptions(options));
-};
-
-/**
- * Returns list of available marketing campaign themes
  * @summary Get available campaign themes
  */
 export const getGetThemesUrl = () => {
@@ -261,3 +177,519 @@ export function useGetThemes<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * @summary Generate a full AI marketing campaign package
+ */
+export const getGenerateCampaignUrl = () => {
+  return `/api/campaign/generate`;
+};
+
+export const generateCampaign = async (
+  generateCampaignBody: GenerateCampaignBody,
+  options?: RequestInit,
+): Promise<CampaignResult> => {
+  return customFetch<CampaignResult>(getGenerateCampaignUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(generateCampaignBody),
+  });
+};
+
+export const getGenerateCampaignMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateCampaign>>,
+    TError,
+    { data: BodyType<GenerateCampaignBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof generateCampaign>>,
+  TError,
+  { data: BodyType<GenerateCampaignBody> },
+  TContext
+> => {
+  const mutationKey = ["generateCampaign"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof generateCampaign>>,
+    { data: BodyType<GenerateCampaignBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return generateCampaign(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GenerateCampaignMutationResult = NonNullable<
+  Awaited<ReturnType<typeof generateCampaign>>
+>;
+export type GenerateCampaignMutationBody = BodyType<GenerateCampaignBody>;
+export type GenerateCampaignMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Generate a full AI marketing campaign package
+ */
+export const useGenerateCampaign = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateCampaign>>,
+    TError,
+    { data: BodyType<GenerateCampaignBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof generateCampaign>>,
+  TError,
+  { data: BodyType<GenerateCampaignBody> },
+  TContext
+> => {
+  return useMutation(getGenerateCampaignMutationOptions(options));
+};
+
+/**
+ * @summary Generate a deep marketing strategy with virality engine
+ */
+export const getGenerateStrategyUrl = () => {
+  return `/api/campaign/generate-strategy`;
+};
+
+export const generateStrategy = async (
+  generateCampaignBody: GenerateCampaignBody,
+  options?: RequestInit,
+): Promise<StrategyResult> => {
+  return customFetch<StrategyResult>(getGenerateStrategyUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(generateCampaignBody),
+  });
+};
+
+export const getGenerateStrategyMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateStrategy>>,
+    TError,
+    { data: BodyType<GenerateCampaignBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof generateStrategy>>,
+  TError,
+  { data: BodyType<GenerateCampaignBody> },
+  TContext
+> => {
+  const mutationKey = ["generateStrategy"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof generateStrategy>>,
+    { data: BodyType<GenerateCampaignBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return generateStrategy(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GenerateStrategyMutationResult = NonNullable<
+  Awaited<ReturnType<typeof generateStrategy>>
+>;
+export type GenerateStrategyMutationBody = BodyType<GenerateCampaignBody>;
+export type GenerateStrategyMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Generate a deep marketing strategy with virality engine
+ */
+export const useGenerateStrategy = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateStrategy>>,
+    TError,
+    { data: BodyType<GenerateCampaignBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof generateStrategy>>,
+  TError,
+  { data: BodyType<GenerateCampaignBody> },
+  TContext
+> => {
+  return useMutation(getGenerateStrategyMutationOptions(options));
+};
+
+/**
+ * @summary Generate a 1-Click Ads Factory video production plan
+ */
+export const getGenerateVideoPlanUrl = () => {
+  return `/api/campaign/generate-video-plan`;
+};
+
+export const generateVideoPlan = async (
+  generateCampaignBody: GenerateCampaignBody,
+  options?: RequestInit,
+): Promise<VideoPlanResult> => {
+  return customFetch<VideoPlanResult>(getGenerateVideoPlanUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(generateCampaignBody),
+  });
+};
+
+export const getGenerateVideoPlanMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateVideoPlan>>,
+    TError,
+    { data: BodyType<GenerateCampaignBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof generateVideoPlan>>,
+  TError,
+  { data: BodyType<GenerateCampaignBody> },
+  TContext
+> => {
+  const mutationKey = ["generateVideoPlan"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof generateVideoPlan>>,
+    { data: BodyType<GenerateCampaignBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return generateVideoPlan(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GenerateVideoPlanMutationResult = NonNullable<
+  Awaited<ReturnType<typeof generateVideoPlan>>
+>;
+export type GenerateVideoPlanMutationBody = BodyType<GenerateCampaignBody>;
+export type GenerateVideoPlanMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Generate a 1-Click Ads Factory video production plan
+ */
+export const useGenerateVideoPlan = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateVideoPlan>>,
+    TError,
+    { data: BodyType<GenerateCampaignBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof generateVideoPlan>>,
+  TError,
+  { data: BodyType<GenerateCampaignBody> },
+  TContext
+> => {
+  return useMutation(getGenerateVideoPlanMutationOptions(options));
+};
+
+/**
+ * @summary Generate a complete brand identity system
+ */
+export const getGenerateBrandUrl = () => {
+  return `/api/campaign/generate-brand`;
+};
+
+export const generateBrand = async (
+  generateCampaignBody: GenerateCampaignBody,
+  options?: RequestInit,
+): Promise<BrandResult> => {
+  return customFetch<BrandResult>(getGenerateBrandUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(generateCampaignBody),
+  });
+};
+
+export const getGenerateBrandMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateBrand>>,
+    TError,
+    { data: BodyType<GenerateCampaignBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof generateBrand>>,
+  TError,
+  { data: BodyType<GenerateCampaignBody> },
+  TContext
+> => {
+  const mutationKey = ["generateBrand"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof generateBrand>>,
+    { data: BodyType<GenerateCampaignBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return generateBrand(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GenerateBrandMutationResult = NonNullable<
+  Awaited<ReturnType<typeof generateBrand>>
+>;
+export type GenerateBrandMutationBody = BodyType<GenerateCampaignBody>;
+export type GenerateBrandMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Generate a complete brand identity system
+ */
+export const useGenerateBrand = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateBrand>>,
+    TError,
+    { data: BodyType<GenerateCampaignBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof generateBrand>>,
+  TError,
+  { data: BodyType<GenerateCampaignBody> },
+  TContext
+> => {
+  return useMutation(getGenerateBrandMutationOptions(options));
+};
+
+/**
+ * @summary Generate an AI influencer persona for the campaign
+ */
+export const getGenerateInfluencerUrl = () => {
+  return `/api/campaign/generate-influencer`;
+};
+
+export const generateInfluencer = async (
+  generateCampaignBody: GenerateCampaignBody,
+  options?: RequestInit,
+): Promise<InfluencerResult> => {
+  return customFetch<InfluencerResult>(getGenerateInfluencerUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(generateCampaignBody),
+  });
+};
+
+export const getGenerateInfluencerMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateInfluencer>>,
+    TError,
+    { data: BodyType<GenerateCampaignBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof generateInfluencer>>,
+  TError,
+  { data: BodyType<GenerateCampaignBody> },
+  TContext
+> => {
+  const mutationKey = ["generateInfluencer"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof generateInfluencer>>,
+    { data: BodyType<GenerateCampaignBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return generateInfluencer(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GenerateInfluencerMutationResult = NonNullable<
+  Awaited<ReturnType<typeof generateInfluencer>>
+>;
+export type GenerateInfluencerMutationBody = BodyType<GenerateCampaignBody>;
+export type GenerateInfluencerMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Generate an AI influencer persona for the campaign
+ */
+export const useGenerateInfluencer = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateInfluencer>>,
+    TError,
+    { data: BodyType<GenerateCampaignBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof generateInfluencer>>,
+  TError,
+  { data: BodyType<GenerateCampaignBody> },
+  TContext
+> => {
+  return useMutation(getGenerateInfluencerMutationOptions(options));
+};
+
+/**
+ * @summary Trend Stealer Mode - adapts campaign to current viral trends
+ */
+export const getTrendStealerUrl = () => {
+  return `/api/campaign/trend-stealer`;
+};
+
+export const trendStealer = async (
+  generateCampaignBody: GenerateCampaignBody,
+  options?: RequestInit,
+): Promise<TrendStealerResult> => {
+  return customFetch<TrendStealerResult>(getTrendStealerUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(generateCampaignBody),
+  });
+};
+
+export const getTrendStealerMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof trendStealer>>,
+    TError,
+    { data: BodyType<GenerateCampaignBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof trendStealer>>,
+  TError,
+  { data: BodyType<GenerateCampaignBody> },
+  TContext
+> => {
+  const mutationKey = ["trendStealer"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof trendStealer>>,
+    { data: BodyType<GenerateCampaignBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return trendStealer(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type TrendStealerMutationResult = NonNullable<
+  Awaited<ReturnType<typeof trendStealer>>
+>;
+export type TrendStealerMutationBody = BodyType<GenerateCampaignBody>;
+export type TrendStealerMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Trend Stealer Mode - adapts campaign to current viral trends
+ */
+export const useTrendStealer = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof trendStealer>>,
+    TError,
+    { data: BodyType<GenerateCampaignBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof trendStealer>>,
+  TError,
+  { data: BodyType<GenerateCampaignBody> },
+  TContext
+> => {
+  return useMutation(getTrendStealerMutationOptions(options));
+};

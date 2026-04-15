@@ -3,12 +3,11 @@
  * Do not edit manually.
  * Api
  * API specification
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import * as zod from "zod";
 
 /**
- * Returns server health status
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({
@@ -16,34 +15,6 @@ export const HealthCheckResponse = zod.object({
 });
 
 /**
- * Uses Groq AI to generate a complete marketing campaign including strategy, ad script, social content, and video storyboard
- * @summary Generate a full AI marketing campaign
- */
-export const GenerateCampaignBody = zod.object({
-  brand: zod.string().describe("Brand name"),
-  product: zod.string().describe("Product or service description"),
-  audience: zod.string().describe("Target audience description"),
-  theme: zod
-    .string()
-    .describe("Campaign theme\/style (e.g. luxury, Gen Z viral, corporate)"),
-});
-
-export const GenerateCampaignResponse = zod.object({
-  campaignIdea: zod.string().describe("The core campaign concept"),
-  strategy: zod.string().describe("Viral marketing strategy"),
-  adScript: zod.string().describe("Scene-by-scene video ad script"),
-  socialContent: zod
-    .string()
-    .describe("Instagram and TikTok captions with hashtags"),
-  videoStoryboard: zod
-    .string()
-    .describe("Video storyboard with scenes, camera angles, and timing"),
-  theme: zod.string().describe("The theme used for this campaign"),
-  brand: zod.string().describe("The brand name"),
-});
-
-/**
- * Returns list of available marketing campaign themes
  * @summary Get available campaign themes
  */
 export const GetThemesResponse = zod.object({
@@ -54,4 +25,175 @@ export const GetThemesResponse = zod.object({
       description: zod.string(),
     }),
   ),
+});
+
+/**
+ * @summary Generate a full AI marketing campaign package
+ */
+export const GenerateCampaignBody = zod.object({
+  brand: zod.string(),
+  product: zod.string(),
+  audience: zod.string(),
+  theme: zod.string(),
+});
+
+export const GenerateCampaignResponse = zod.object({
+  campaignIdea: zod.string(),
+  strategy: zod.string(),
+  adScript: zod.string(),
+  socialContent: zod.string(),
+  videoStoryboard: zod.string(),
+  viralityScore: zod.number(),
+  viralityExplanation: zod.string(),
+  estimatedViews: zod.string(),
+  adsFactory: zod.object({
+    thumbnailPrompt: zod.string(),
+    bestPostingTimes: zod.array(zod.string()),
+    platforms: zod.array(zod.string()),
+    hashtagSets: zod.object({
+      instagram: zod.array(zod.string()).optional(),
+      tiktok: zod.array(zod.string()).optional(),
+    }),
+  }),
+  theme: zod.string(),
+  brand: zod.string(),
+});
+
+/**
+ * @summary Generate a deep marketing strategy with virality engine
+ */
+export const GenerateStrategyBody = zod.object({
+  brand: zod.string(),
+  product: zod.string(),
+  audience: zod.string(),
+  theme: zod.string(),
+});
+
+export const GenerateStrategyResponse = zod.object({
+  positioning: zod.string(),
+  audiencePsychology: zod.string(),
+  viralHooks: zod.array(zod.string()),
+  sloganIdeas: zod.array(zod.string()),
+  platformStrategy: zod.string(),
+  competitorAngle: zod.string(),
+  viralityScore: zod.number(),
+  viralityExplanation: zod.string(),
+  estimatedViews: zod.string(),
+});
+
+/**
+ * @summary Generate a 1-Click Ads Factory video production plan
+ */
+export const GenerateVideoPlanBody = zod.object({
+  brand: zod.string(),
+  product: zod.string(),
+  audience: zod.string(),
+  theme: zod.string(),
+});
+
+export const GenerateVideoPlanResponse = zod.object({
+  script: zod.string(),
+  scenes: zod.array(
+    zod.object({
+      sceneNumber: zod.number(),
+      duration: zod.string(),
+      visual: zod.string(),
+      cameraAngle: zod.string(),
+      audio: zod.string(),
+      textOverlay: zod.string(),
+    }),
+  ),
+  voiceover: zod.string(),
+  musicStyle: zod.string(),
+  editingStyle: zod.string(),
+  captionsText: zod.string(),
+  thumbnailPrompt: zod.string(),
+  runwayPrompt: zod.string(),
+  pikaPrompt: zod.string(),
+  heygen_prompt: zod.string(),
+  versions: zod.object({
+    tiktokViral: zod.string(),
+    luxuryCinematic: zod.string(),
+    memeVersion: zod.string(),
+  }),
+});
+
+/**
+ * @summary Generate a complete brand identity system
+ */
+export const GenerateBrandBody = zod.object({
+  brand: zod.string(),
+  product: zod.string(),
+  audience: zod.string(),
+  theme: zod.string(),
+});
+
+export const GenerateBrandResponse = zod.object({
+  colorPalette: zod.array(
+    zod.object({
+      name: zod.string(),
+      hex: zod.string(),
+      usage: zod.string(),
+    }),
+  ),
+  fontPairings: zod.array(zod.string()),
+  logoConceptDescription: zod.string(),
+  aestheticDirection: zod.string(),
+  moodboardKeywords: zod.array(zod.string()),
+  brandVoice: zod.string(),
+  tagline: zod.string(),
+  brandArchetype: zod.string(),
+});
+
+/**
+ * @summary Generate an AI influencer persona for the campaign
+ */
+export const GenerateInfluencerBody = zod.object({
+  brand: zod.string(),
+  product: zod.string(),
+  audience: zod.string(),
+  theme: zod.string(),
+});
+
+export const GenerateInfluencerResponse = zod.object({
+  name: zod.string(),
+  handle: zod.string(),
+  age: zod.number(),
+  location: zod.string(),
+  bio: zod.string(),
+  aesthetic: zod.string(),
+  contentStyle: zod.string(),
+  audienceSize: zod.string(),
+  platforms: zod.array(zod.string()),
+  contentPillars: zod.array(zod.string()),
+  sampleCaptions: zod.array(zod.string()),
+  brandCollabAngle: zod.string(),
+  characterStory: zod.string(),
+});
+
+/**
+ * @summary Trend Stealer Mode - adapts campaign to current viral trends
+ */
+export const TrendStealerBody = zod.object({
+  brand: zod.string(),
+  product: zod.string(),
+  audience: zod.string(),
+  theme: zod.string(),
+});
+
+export const TrendStealerResponse = zod.object({
+  currentTrends: zod.array(
+    zod.object({
+      trend: zod.string(),
+      platform: zod.string(),
+      virality: zod.string(),
+      howToUse: zod.string(),
+    }),
+  ),
+  adaptedCampaign: zod.string(),
+  trendHooks: zod.array(zod.string()),
+  viralFormula: zod.string(),
+  soundSuggestions: zod.array(zod.string()),
+  timingAdvice: zod.string(),
+  predictedPlatforms: zod.array(zod.string()),
 });

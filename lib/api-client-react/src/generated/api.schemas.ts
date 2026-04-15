@@ -3,38 +3,134 @@
  * Do not edit manually.
  * Api
  * API specification
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 export interface HealthStatus {
   status: string;
 }
 
 export interface GenerateCampaignBody {
-  /** Brand name */
   brand: string;
-  /** Product or service description */
   product: string;
-  /** Target audience description */
   audience: string;
-  /** Campaign theme/style (e.g. luxury, Gen Z viral, corporate) */
   theme: string;
 }
 
+export type AdsFactoryHashtagSets = {
+  instagram?: string[];
+  tiktok?: string[];
+};
+
+export interface AdsFactory {
+  thumbnailPrompt: string;
+  bestPostingTimes: string[];
+  platforms: string[];
+  hashtagSets: AdsFactoryHashtagSets;
+}
+
 export interface CampaignResult {
-  /** The core campaign concept */
   campaignIdea: string;
-  /** Viral marketing strategy */
   strategy: string;
-  /** Scene-by-scene video ad script */
   adScript: string;
-  /** Instagram and TikTok captions with hashtags */
   socialContent: string;
-  /** Video storyboard with scenes, camera angles, and timing */
   videoStoryboard: string;
-  /** The theme used for this campaign */
+  viralityScore: number;
+  viralityExplanation: string;
+  estimatedViews: string;
+  adsFactory: AdsFactory;
   theme: string;
-  /** The brand name */
   brand: string;
+}
+
+export interface StrategyResult {
+  positioning: string;
+  audiencePsychology: string;
+  viralHooks: string[];
+  sloganIdeas: string[];
+  platformStrategy: string;
+  competitorAngle: string;
+  viralityScore: number;
+  viralityExplanation: string;
+  estimatedViews: string;
+}
+
+export interface VideoScene {
+  sceneNumber: number;
+  duration: string;
+  visual: string;
+  cameraAngle: string;
+  audio: string;
+  textOverlay: string;
+}
+
+export interface VideoVersions {
+  tiktokViral: string;
+  luxuryCinematic: string;
+  memeVersion: string;
+}
+
+export interface VideoPlanResult {
+  script: string;
+  scenes: VideoScene[];
+  voiceover: string;
+  musicStyle: string;
+  editingStyle: string;
+  captionsText: string;
+  thumbnailPrompt: string;
+  runwayPrompt: string;
+  pikaPrompt: string;
+  heygen_prompt: string;
+  versions: VideoVersions;
+}
+
+export interface BrandColor {
+  name: string;
+  hex: string;
+  usage: string;
+}
+
+export interface BrandResult {
+  colorPalette: BrandColor[];
+  fontPairings: string[];
+  logoConceptDescription: string;
+  aestheticDirection: string;
+  moodboardKeywords: string[];
+  brandVoice: string;
+  tagline: string;
+  brandArchetype: string;
+}
+
+export interface InfluencerResult {
+  name: string;
+  handle: string;
+  age: number;
+  location: string;
+  bio: string;
+  aesthetic: string;
+  contentStyle: string;
+  audienceSize: string;
+  platforms: string[];
+  contentPillars: string[];
+  sampleCaptions: string[];
+  brandCollabAngle: string;
+  characterStory: string;
+}
+
+export interface TrendItem {
+  trend: string;
+  platform: string;
+  virality: string;
+  howToUse: string;
+}
+
+export interface TrendStealerResult {
+  currentTrends: TrendItem[];
+  adaptedCampaign: string;
+  trendHooks: string[];
+  viralFormula: string;
+  soundSuggestions: string[];
+  timingAdvice: string;
+  predictedPlatforms: string[];
 }
 
 export interface Theme {
