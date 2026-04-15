@@ -6,4 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./campaignResult";
+export * from "./errorResponse";
+export * from "./generateCampaignBody";
 export * from "./healthStatus";
+export * from "./theme";
+export * from "./themeList";

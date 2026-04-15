@@ -14,3 +14,44 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * Uses Groq AI to generate a complete marketing campaign including strategy, ad script, social content, and video storyboard
+ * @summary Generate a full AI marketing campaign
+ */
+export const GenerateCampaignBody = zod.object({
+  brand: zod.string().describe("Brand name"),
+  product: zod.string().describe("Product or service description"),
+  audience: zod.string().describe("Target audience description"),
+  theme: zod
+    .string()
+    .describe("Campaign theme\/style (e.g. luxury, Gen Z viral, corporate)"),
+});
+
+export const GenerateCampaignResponse = zod.object({
+  campaignIdea: zod.string().describe("The core campaign concept"),
+  strategy: zod.string().describe("Viral marketing strategy"),
+  adScript: zod.string().describe("Scene-by-scene video ad script"),
+  socialContent: zod
+    .string()
+    .describe("Instagram and TikTok captions with hashtags"),
+  videoStoryboard: zod
+    .string()
+    .describe("Video storyboard with scenes, camera angles, and timing"),
+  theme: zod.string().describe("The theme used for this campaign"),
+  brand: zod.string().describe("The brand name"),
+});
+
+/**
+ * Returns list of available marketing campaign themes
+ * @summary Get available campaign themes
+ */
+export const GetThemesResponse = zod.object({
+  themes: zod.array(
+    zod.object({
+      id: zod.string(),
+      label: zod.string(),
+      description: zod.string(),
+    }),
+  ),
+});

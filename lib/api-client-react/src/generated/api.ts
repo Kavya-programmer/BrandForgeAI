@@ -5,18 +5,27 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  MutationFunction,
   QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { HealthStatus } from "./api.schemas";
+import type {
+  CampaignResult,
+  ErrorResponse,
+  GenerateCampaignBody,
+  HealthStatus,
+  ThemeList,
+} from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
-import type { ErrorType } from "../custom-fetch";
+import type { ErrorType, BodyType } from "../custom-fetch";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -92,6 +101,159 @@ export function useHealthCheck<
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getHealthCheckQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Uses Groq AI to generate a complete marketing campaign including strategy, ad script, social content, and video storyboard
+ * @summary Generate a full AI marketing campaign
+ */
+export const getGenerateCampaignUrl = () => {
+  return `/api/campaign/generate`;
+};
+
+export const generateCampaign = async (
+  generateCampaignBody: GenerateCampaignBody,
+  options?: RequestInit,
+): Promise<CampaignResult> => {
+  return customFetch<CampaignResult>(getGenerateCampaignUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(generateCampaignBody),
+  });
+};
+
+export const getGenerateCampaignMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateCampaign>>,
+    TError,
+    { data: BodyType<GenerateCampaignBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof generateCampaign>>,
+  TError,
+  { data: BodyType<GenerateCampaignBody> },
+  TContext
+> => {
+  const mutationKey = ["generateCampaign"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof generateCampaign>>,
+    { data: BodyType<GenerateCampaignBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return generateCampaign(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GenerateCampaignMutationResult = NonNullable<
+  Awaited<ReturnType<typeof generateCampaign>>
+>;
+export type GenerateCampaignMutationBody = BodyType<GenerateCampaignBody>;
+export type GenerateCampaignMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Generate a full AI marketing campaign
+ */
+export const useGenerateCampaign = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateCampaign>>,
+    TError,
+    { data: BodyType<GenerateCampaignBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof generateCampaign>>,
+  TError,
+  { data: BodyType<GenerateCampaignBody> },
+  TContext
+> => {
+  return useMutation(getGenerateCampaignMutationOptions(options));
+};
+
+/**
+ * Returns list of available marketing campaign themes
+ * @summary Get available campaign themes
+ */
+export const getGetThemesUrl = () => {
+  return `/api/campaign/themes`;
+};
+
+export const getThemes = async (options?: RequestInit): Promise<ThemeList> => {
+  return customFetch<ThemeList>(getGetThemesUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetThemesQueryKey = () => {
+  return [`/api/campaign/themes`] as const;
+};
+
+export const getGetThemesQueryOptions = <
+  TData = Awaited<ReturnType<typeof getThemes>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getThemes>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetThemesQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getThemes>>> = ({
+    signal,
+  }) => getThemes({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getThemes>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetThemesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getThemes>>
+>;
+export type GetThemesQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get available campaign themes
+ */
+
+export function useGetThemes<
+  TData = Awaited<ReturnType<typeof getThemes>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getThemes>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetThemesQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

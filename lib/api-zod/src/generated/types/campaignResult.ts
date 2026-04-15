@@ -5,20 +5,6 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-export interface HealthStatus {
-  status: string;
-}
-
-export interface GenerateCampaignBody {
-  /** Brand name */
-  brand: string;
-  /** Product or service description */
-  product: string;
-  /** Target audience description */
-  audience: string;
-  /** Campaign theme/style (e.g. luxury, Gen Z viral, corporate) */
-  theme: string;
-}
 
 export interface CampaignResult {
   /** The core campaign concept */
@@ -35,18 +21,4 @@ export interface CampaignResult {
   theme: string;
   /** The brand name */
   brand: string;
-}
-
-export interface Theme {
-  id: string;
-  label: string;
-  description: string;
-}
-
-export interface ThemeList {
-  themes: Theme[];
-}
-
-export interface ErrorResponse {
-  error: string;
 }

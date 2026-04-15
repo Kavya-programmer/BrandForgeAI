@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: campaign
+    description: AI marketing campaign generation
 paths:
   /healthz:
     get:
@@ -24,6 +26,51 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /campaign/generate:
+    post:
+      operationId: generateCampaign
+      tags: [campaign]
+      summary: Generate a full AI marketing campaign
+      description: Uses Groq AI to generate a complete marketing campaign including strategy, ad script, social content, and video storyboard
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateCampaignBody"
+      responses:
+        "200":
+          description: Successfully generated campaign
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CampaignResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /campaign/themes:
+    get:
+      operationId: getThemes
+      tags: [campaign]
+      summary: Get available campaign themes
+      description: Returns list of available marketing campaign themes
+      responses:
+        "200":
+          description: List of themes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThemeList"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +81,88 @@ components:
       required:
         - status
 
+    GenerateCampaignBody:
+      type: object
+      properties:
+        brand:
+          type: string
+          description: Brand name
+        product:
+          type: string
+          description: Product or service description
+        audience:
+          type: string
+          description: Target audience description
+        theme:
+          type: string
+          description: Campaign theme/style (e.g. luxury, Gen Z viral, corporate)
+      required:
+        - brand
+        - product
+        - audience
+        - theme
+
+    CampaignResult:
+      type: object
+      properties:
+        campaignIdea:
+          type: string
+          description: The core campaign concept
+        strategy:
+          type: string
+          description: Viral marketing strategy
+        adScript:
+          type: string
+          description: Scene-by-scene video ad script
+        socialContent:
+          type: string
+          description: Instagram and TikTok captions with hashtags
+        videoStoryboard:
+          type: string
+          description: Video storyboard with scenes, camera angles, and timing
+        theme:
+          type: string
+          description: The theme used for this campaign
+        brand:
+          type: string
+          description: The brand name
+      required:
+        - campaignIdea
+        - strategy
+        - adScript
+        - socialContent
+        - videoStoryboard
+        - theme
+        - brand
+
+    ThemeList:
+      type: object
+      properties:
+        themes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Theme"
+      required:
+        - themes
+
+    Theme:
+      type: object
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        description:
+          type: string
+      required:
+        - id
+        - label
+        - description
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
