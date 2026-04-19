@@ -1,4 +1,4 @@
-#🚀 BrandForgeAI
+🚀 BrandForgeAI
 AI-Powered Marketing Agency Generator
 
 BrandForgeAI is an AI-driven marketing platform that transforms minimal brand input into complete, execution-ready marketing campaigns in seconds.
