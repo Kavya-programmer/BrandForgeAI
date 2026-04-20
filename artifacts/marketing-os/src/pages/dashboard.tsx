@@ -2,7 +2,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { 
   Wand2, Zap, Target, 
-  TrendingUp, Video, PenTool, Hash, Loader2, Sparkles
+  TrendingUp, Video, PenTool, Hash, Loader2, Sparkles,
+  RefreshCw, AlertCircle, Send
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,8 +22,11 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { CampaignTabs } from "@/components/campaign-tabs";
 
+type FormData = { brand: string; product: string; audience: string; theme: string };
+type ActionType = "campaign" | "strategy" | "video" | "brand" | "influencer" | "trends";
+
 export default function Dashboard() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     brand: "",
     product: "",
     audience: "",
@@ -31,74 +35,70 @@ export default function Dashboard() {
 
   const [activeTab, setActiveTab] = useState("campaign");
   const [generatedData, setGeneratedData] = useState<any>({});
+  const [lastAction, setLastAction] = useState<{ type: ActionType; data: FormData } | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [refineText, setRefineText] = useState("");
+  const [refineResult, setRefineResult] = useState<string | null>(null);
+  const [isRefining, setIsRefining] = useState(false);
+  const [feedbackGiven, setFeedbackGiven] = useState<"up" | "down" | null>(null);
   const { toast } = useToast();
 
   const { data: themesData, isLoading: isLoadingThemes } = useGetThemes();
 
-  // Mutations
+  const onSuccess = (type: ActionType, tab: string, label: string, data: unknown) => {
+    setGeneratedData((prev: any) => ({ ...prev, [type === "trends" ? "trends" : type]: data }));
+    setActiveTab(tab);
+    setApiError(null);
+    setRefineResult(null);
+    setFeedbackGiven(null);
+    toast({ title: `${label} generated successfully` });
+  };
+
+  const onError = (label: string, msg?: string) => {
+    const errorMsg = msg || `Failed to generate ${label}. Please try again.`;
+    setApiError(errorMsg);
+    toast({ title: errorMsg, variant: "destructive" });
+  };
+
   const generateCampaign = useGenerateCampaign({
     mutation: {
-      onSuccess: (data) => {
-        setGeneratedData((prev: any) => ({ ...prev, campaign: data }));
-        setActiveTab("campaign");
-        toast({ title: "Campaign generated successfully" });
-      },
-      onError: () => toast({ title: "Failed to generate campaign", variant: "destructive" })
+      onSuccess: (data) => onSuccess("campaign", "campaign", "Campaign", data),
+      onError: () => onError("campaign"),
     }
   });
 
   const generateStrategy = useGenerateStrategy({
     mutation: {
-      onSuccess: (data) => {
-        setGeneratedData((prev: any) => ({ ...prev, strategy: data }));
-        setActiveTab("strategy");
-        toast({ title: "Strategy generated successfully" });
-      },
-      onError: () => toast({ title: "Failed to generate strategy", variant: "destructive" })
+      onSuccess: (data) => onSuccess("strategy", "strategy", "Strategy", data),
+      onError: () => onError("strategy"),
     }
   });
 
   const generateVideo = useGenerateVideoPlan({
     mutation: {
-      onSuccess: (data) => {
-        setGeneratedData((prev: any) => ({ ...prev, video: data }));
-        setActiveTab("video");
-        toast({ title: "Video plan generated successfully" });
-      },
-      onError: () => toast({ title: "Failed to generate video plan", variant: "destructive" })
+      onSuccess: (data) => onSuccess("video", "video", "Video plan", data),
+      onError: () => onError("video plan"),
     }
   });
 
   const generateBrand = useGenerateBrand({
     mutation: {
-      onSuccess: (data) => {
-        setGeneratedData((prev: any) => ({ ...prev, brand: data }));
-        setActiveTab("brand");
-        toast({ title: "Brand identity generated successfully" });
-      },
-      onError: () => toast({ title: "Failed to generate brand identity", variant: "destructive" })
+      onSuccess: (data) => onSuccess("brand", "brand", "Brand identity", data),
+      onError: () => onError("brand identity"),
     }
   });
 
   const generateInfluencer = useGenerateInfluencer({
     mutation: {
-      onSuccess: (data) => {
-        setGeneratedData((prev: any) => ({ ...prev, influencer: data }));
-        setActiveTab("influencer");
-        toast({ title: "AI Influencer generated successfully" });
-      },
-      onError: () => toast({ title: "Failed to generate AI influencer", variant: "destructive" })
+      onSuccess: (data) => onSuccess("influencer", "influencer", "AI Influencer", data),
+      onError: () => onError("influencer"),
     }
   });
 
   const trendStealer = useTrendStealer({
     mutation: {
-      onSuccess: (data) => {
-        setGeneratedData((prev: any) => ({ ...prev, trends: data }));
-        setActiveTab("trends");
-        toast({ title: "Trend stealer strategy generated successfully" });
-      },
-      onError: () => toast({ title: "Failed to steal trends", variant: "destructive" })
+      onSuccess: (data) => onSuccess("trends", "trends", "Trend strategy", data),
+      onError: () => onError("trend strategy"),
     }
   });
 
@@ -125,6 +125,64 @@ export default function Dashboard() {
     }
     return true;
   };
+
+  const triggerAction = (type: ActionType) => {
+    if (!validateForm()) return;
+    const snapshot = { ...formData };
+    setLastAction({ type, data: snapshot });
+    const map: Record<ActionType, () => void> = {
+      campaign: () => generateCampaign.mutate({ data: snapshot }),
+      strategy: () => generateStrategy.mutate({ data: snapshot }),
+      video: () => generateVideo.mutate({ data: snapshot }),
+      brand: () => generateBrand.mutate({ data: snapshot }),
+      influencer: () => generateInfluencer.mutate({ data: snapshot }),
+      trends: () => trendStealer.mutate({ data: snapshot }),
+    };
+    map[type]();
+  };
+
+  const handleRegenerate = () => {
+    if (!lastAction) return;
+    setRefineResult(null);
+    setFeedbackGiven(null);
+    setApiError(null);
+    triggerAction(lastAction.type);
+  };
+
+  const handleRefine = async () => {
+    if (!refineText.trim() || Object.keys(generatedData).length === 0) return;
+    setIsRefining(true);
+    try {
+      const previousResponse = JSON.stringify(generatedData, null, 2);
+      const resp = await fetch("/api/campaign/refine", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          previousResponse,
+          refinement: refineText,
+          brand: formData.brand,
+          theme: formData.theme,
+        }),
+      });
+      if (!resp.ok) throw new Error("Refine failed");
+      const result = await resp.json();
+      setRefineResult(result.refinedContent);
+      setRefineText("");
+      toast({ title: "Content refined successfully" });
+    } catch {
+      toast({ title: "Failed to refine content", variant: "destructive" });
+    } finally {
+      setIsRefining(false);
+    }
+  };
+
+  const handleFeedback = (type: "up" | "down") => {
+    setFeedbackGiven(type);
+    console.log(`[Feedback] ${type === "up" ? "👍 Positive" : "👎 Negative"} feedback for action: ${lastAction?.type}, brand: ${formData.brand}`);
+    toast({ title: type === "up" ? "Thanks for the feedback!" : "Got it — try regenerating for a better result" });
+  };
+
+  const hasData = Object.keys(generatedData).length > 0;
 
   return (
     <div className="min-h-[100dvh] bg-background text-foreground flex flex-col md:flex-row overflow-hidden relative">
@@ -212,12 +270,11 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="mt-8 pt-6 border-t border-white/10 space-y-4">
+        <div className="mt-8 pt-6 border-t border-white/10 space-y-3">
+          {/* Primary: Generate Campaign */}
           <Button 
             className="w-full h-14 text-base font-medium rounded-xl bg-white text-black hover:bg-white/90 transition-all relative overflow-hidden group"
-            onClick={() => {
-              if (validateForm()) generateCampaign.mutate({ data: formData });
-            }}
+            onClick={() => triggerAction("campaign")}
             disabled={isGenerating}
             data-testid="btn-generate-campaign"
           >
@@ -233,78 +290,116 @@ export default function Dashboard() {
             )}
           </Button>
 
-          <div className="grid grid-cols-2 gap-3">
+          {/* Module grid */}
+          <div className="grid grid-cols-2 gap-2">
             <Button 
               variant="outline" 
-              className="h-12 bg-transparent border-white/10 hover:bg-white/5 text-white/80 hover:text-white"
-              onClick={() => {
-                if (validateForm()) generateStrategy.mutate({ data: formData });
-              }}
+              className="h-11 bg-transparent border-white/10 hover:bg-white/5 text-white/80 hover:text-white text-sm"
+              onClick={() => triggerAction("strategy")}
               disabled={isGenerating}
               data-testid="btn-generate-strategy"
             >
-              {generateStrategy.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Target className="w-4 h-4 mr-2" />}
+              {generateStrategy.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Target className="w-4 h-4 mr-1.5" />}
               Strategy
             </Button>
             <Button 
               variant="outline" 
-              className="h-12 bg-transparent border-white/10 hover:bg-white/5 text-white/80 hover:text-white"
-              onClick={() => {
-                if (validateForm()) generateVideo.mutate({ data: formData });
-              }}
+              className="h-11 bg-transparent border-white/10 hover:bg-white/5 text-white/80 hover:text-white text-sm"
+              onClick={() => triggerAction("video")}
               disabled={isGenerating}
               data-testid="btn-generate-video"
             >
-              {generateVideo.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Video className="w-4 h-4 mr-2" />}
+              {generateVideo.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Video className="w-4 h-4 mr-1.5" />}
               Video Factory
             </Button>
             <Button 
               variant="outline" 
-              className="h-12 bg-transparent border-white/10 hover:bg-white/5 text-white/80 hover:text-white"
-              onClick={() => {
-                if (validateForm()) generateBrand.mutate({ data: formData });
-              }}
+              className="h-11 bg-transparent border-white/10 hover:bg-white/5 text-white/80 hover:text-white text-sm"
+              onClick={() => triggerAction("brand")}
               disabled={isGenerating}
               data-testid="btn-generate-brand"
             >
-              {generateBrand.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <PenTool className="w-4 h-4 mr-2" />}
+              {generateBrand.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <PenTool className="w-4 h-4 mr-1.5" />}
               Brand Identity
             </Button>
             <Button 
               variant="outline" 
-              className="h-12 bg-transparent border-white/10 hover:bg-white/5 text-white/80 hover:text-white"
-              onClick={() => {
-                if (validateForm()) trendStealer.mutate({ data: formData });
-              }}
+              className="h-11 bg-transparent border-white/10 hover:bg-white/5 text-white/80 hover:text-white text-sm"
+              onClick={() => triggerAction("trends")}
               disabled={isGenerating}
               data-testid="btn-generate-trends"
             >
-              {trendStealer.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <TrendingUp className="w-4 h-4 mr-2" />}
+              {trendStealer.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <TrendingUp className="w-4 h-4 mr-1.5" />}
               Trend Stealer
             </Button>
             <Button 
               variant="outline" 
-              className="col-span-2 h-12 bg-transparent border-white/10 hover:bg-white/5 text-white/80 hover:text-white"
-              onClick={() => {
-                if (validateForm()) generateInfluencer.mutate({ data: formData });
-              }}
+              className="col-span-2 h-11 bg-transparent border-white/10 hover:bg-white/5 text-white/80 hover:text-white text-sm"
+              onClick={() => triggerAction("influencer")}
               disabled={isGenerating}
               data-testid="btn-generate-influencer"
             >
-              {generateInfluencer.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Hash className="w-4 h-4 mr-2" />}
+              {generateInfluencer.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Hash className="w-4 h-4 mr-1.5" />}
               AI Influencer
             </Button>
           </div>
+
+          {/* Regenerate button — shown when there's a last action */}
+          {lastAction && !isGenerating && (
+            <Button 
+              variant="ghost"
+              className="w-full h-10 border border-white/10 text-white/50 hover:text-white hover:bg-white/5 text-sm gap-2"
+              onClick={handleRegenerate}
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              Regenerate {lastAction.type.charAt(0).toUpperCase() + lastAction.type.slice(1)}
+            </Button>
+          )}
+
+          {/* Refine input — shown when there's output data */}
+          {hasData && !isGenerating && (
+            <div className="pt-2 border-t border-white/5 space-y-2">
+              <Label className="text-white/40 text-xs uppercase tracking-wider">Refine with AI</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={refineText}
+                  onChange={e => setRefineText(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleRefine(); } }}
+                  placeholder="Make it more emotional..."
+                  className="bg-white/5 border-white/10 focus-visible:ring-white/20 text-sm h-10 flex-1"
+                  disabled={isRefining}
+                />
+                <Button
+                  size="icon"
+                  className="h-10 w-10 shrink-0 bg-white text-black hover:bg-white/90"
+                  onClick={handleRefine}
+                  disabled={isRefining || !refineText.trim()}
+                >
+                  {isRefining ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Right Panel: Output Tabs */}
       <div className="flex-1 h-[100dvh] overflow-hidden bg-black/95 relative flex flex-col">
-        {/* Subtle background effects */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/[0.03] via-transparent to-transparent pointer-events-none" />
         <div className="absolute inset-0 pointer-events-none scanline opacity-20" />
 
-        {Object.keys(generatedData).length === 0 ? (
+        {/* API Error Banner */}
+        {apiError && !isGenerating && (
+          <div className="relative z-20 mx-6 mt-4 px-4 py-3 rounded-xl border border-red-500/30 bg-red-500/10 flex items-start gap-3">
+            <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-red-300">{apiError}</p>
+            </div>
+            <button onClick={() => setApiError(null)} className="text-red-400/60 hover:text-red-400 text-xs shrink-0">✕</button>
+          </div>
+        )}
+
+        {!hasData ? (
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center relative z-10">
             <motion.div 
               initial={{ scale: 0.9, opacity: 0 }}
@@ -323,7 +418,12 @@ export default function Dashboard() {
           <CampaignTabs 
             activeTab={activeTab} 
             setActiveTab={setActiveTab} 
-            data={generatedData} 
+            data={generatedData}
+            onFeedback={handleFeedback}
+            onRegenerate={handleRegenerate}
+            feedbackGiven={feedbackGiven}
+            refineResult={refineResult}
+            lastActionType={lastAction?.type ?? null}
           />
         )}
       </div>

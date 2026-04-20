@@ -1,0 +1,175 @@
+I’m working on my project **BrandForgeAI (React + Express + Groq LLM)**. I need you to upgrade my app for Day 3 of a competition. Please make the following changes carefully and ensure everything is fully functional.
+
+---
+
+## 🔧 PART 1 — Enhance LLM/API Integration (Core Logic)
+
+### 1. Multi-turn Conversation Support
+
+* Modify the backend so the API supports context-based refinement.
+* Store the previous AI response and allow users to send follow-up instructions.
+* Update the Groq call to include conversation history:
+
+  * system prompt
+  * previous response
+  * new user instruction
+
+---
+
+### 2. Improve Prompt Quality
+
+Update the prompt to:
+
+* Generate platform-specific outputs (Instagram, TikTok, YouTube)
+* Include:
+
+  * Strong hooks
+  * Clear CTA
+  * Emotional triggers
+* Maintain strict emoji-section output format:
+  🎯 Strategy
+  🧠 Insights
+  🎬 Content
+  📱 Social
+  🎥 Video
+
+---
+
+### 3. Improve Scoring Logic
+
+Update the virality/predictive score to consider:
+
+* Hook strength (presence of strong opening lines)
+* CTA presence
+* Emotional/viral keywords
+* Platform relevance
+
+---
+
+### 4. Error Handling + Retry Logic
+
+In backend:
+
+* Add try/catch for Groq API
+* Handle:
+
+  * timeouts
+  * empty responses
+  * invalid format
+* Add retry logic (retry up to 2–3 times)
+* Return a fallback error message if all retries fail
+
+---
+
+### 5. Performance Optimization (Simple)
+
+* Prevent duplicate API calls
+* Optionally cache the last response (in-memory is fine)
+
+---
+
+## 🎨 PART 2 — UI Improvements (Frontend)
+
+### Add:
+
+1. Error message display if API fails
+2. 👍 👎 feedback buttons (just log for now)
+3. “Regenerate” button
+
+---
+
+## 🧠 PART 3 — FIX NON-WORKING TABS
+
+Currently these tabs don’t return any output. Fix them so each tab shows meaningful content using the existing LLM output or new prompts.
+
+---
+
+### 1. STRATEGY TAB
+
+* Display:
+
+  * Campaign strategy (🎯 section)
+  * Target audience approach
+  * Key messaging
+
+---
+
+### 2. VIDEO TAB (IMPORTANT)
+
+* Try to integrate a simple video generation platform API if possible (use a placeholder/mock if needed).
+* IF not possible:
+
+  * Generate a structured storyboard using LLM:
+
+    * Scene number
+    * Duration
+    * Visuals
+    * Dialogue / voiceover
+    * On-screen text
+* Display it clearly in UI
+
+---
+
+### 3. BRAND TAB
+
+* Show:
+
+  * Brand voice
+  * Tone
+  * Positioning
+  * Unique selling points
+
+---
+
+### 4. INFLUENCER TAB
+
+* Generate:
+
+  * Suggested influencer types
+  * Platform (Instagram, TikTok, YouTube)
+  * Content style
+  * Example collaboration ideas
+
+---
+
+### 5. TRENDS TAB
+
+* Generate:
+
+  * Relevant trends for the selected theme
+  * Viral formats
+  * Hashtag ideas
+  * Platform-specific trends
+
+---
+
+## 🧪 PART 4 — TESTING
+
+* Ensure all tabs display output correctly
+* Ensure no crashes if API fails
+* Ensure UI updates correctly on new generation
+
+---
+
+## ⚠️ IMPORTANT
+
+* Do NOT modify or remove the existing loading state (it already works)
+* Do NOT break existing functionality
+* Keep code modular and clean
+* Ensure TypeScript types are correct
+* Ensure frontend and backend are properly connected
+
+---
+
+## ✅ FINAL CHECK
+
+After implementation:
+
+* Run the app
+* Test campaign generation
+* Test all tabs
+* Confirm no empty UI sections
+
+---
+
+Tell me what files you modified and summarize the changes.

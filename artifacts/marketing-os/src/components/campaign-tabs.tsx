@@ -1,12 +1,23 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Copy, CheckCircle2, TrendingUp, Target, Video, PenTool, Hash, Activity } from "lucide-react";
+import { Copy, CheckCircle2, TrendingUp, Target, Video, PenTool, Hash, Activity, ThumbsUp, ThumbsDown, RefreshCw } from "lucide-react";
 
-export function CampaignTabs({ activeTab, setActiveTab, data }: { activeTab: string, setActiveTab: (v: string) => void, data: any }) {
+interface CampaignTabsProps {
+  activeTab: string;
+  setActiveTab: (v: string) => void;
+  data: any;
+  onFeedback: (type: "up" | "down") => void;
+  onRegenerate: () => void;
+  feedbackGiven: "up" | "down" | null;
+  refineResult: string | null;
+  lastActionType: string | null;
+}
+
+export function CampaignTabs({ activeTab, setActiveTab, data, onFeedback, onRegenerate, feedbackGiven, refineResult, lastActionType }: CampaignTabsProps) {
   
   const container = {
     hidden: { opacity: 0 },
@@ -328,6 +339,20 @@ export function CampaignTabs({ activeTab, setActiveTab, data }: { activeTab: str
               </div>
             </motion.div>
 
+            {data.brand.uniqueSellingPoints && data.brand.uniqueSellingPoints.length > 0 && (
+              <motion.div variants={item}>
+                <h3 className="text-white/50 text-xs uppercase tracking-wider mb-4 px-2">Unique Selling Points</h3>
+                <div className="space-y-3">
+                  {data.brand.uniqueSellingPoints.map((usp: string, i: number) => (
+                    <div key={i} className="p-4 bg-white/5 border border-white/10 rounded-xl flex items-start gap-4">
+                      <div className="w-7 h-7 rounded-full bg-white text-black flex items-center justify-center font-mono text-xs shrink-0 font-bold">{i + 1}</div>
+                      <p className="text-white/90 font-medium pt-0.5">{usp}</p>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <motion.div variants={item} className="p-8 bg-black border border-white/10 rounded-2xl">
                 <h3 className="text-white/50 text-xs uppercase tracking-wider mb-4">Typography</h3>
@@ -388,6 +413,20 @@ export function CampaignTabs({ activeTab, setActiveTab, data }: { activeTab: str
                 </div>
               </div>
             </motion.div>
+
+            {data.influencer.collaborationIdeas && data.influencer.collaborationIdeas.length > 0 && (
+              <motion.div variants={item}>
+                <h3 className="text-white/50 text-xs uppercase tracking-wider mb-4 px-2">Collaboration Ideas</h3>
+                <div className="space-y-3">
+                  {data.influencer.collaborationIdeas.map((idea: string, i: number) => (
+                    <div key={i} className="p-5 bg-white/5 border border-white/10 rounded-xl flex items-start gap-4">
+                      <div className="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center font-mono shrink-0">{i + 1}</div>
+                      <p className="text-white/90 font-medium pt-1">{idea}</p>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
 
             <motion.div variants={item}>
               <h3 className="text-white/50 text-xs uppercase tracking-wider mb-4 px-2">Sample Content</h3>
@@ -461,6 +500,56 @@ export function CampaignTabs({ activeTab, setActiveTab, data }: { activeTab: str
             </div>
           </motion.div>
         )}
+
+        {/* ─── Refine Result Section ─────────────────────────────────────── */}
+        {refineResult && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-4xl mx-auto mt-8"
+          >
+            <div className="p-6 bg-white/5 border border-white/20 rounded-2xl">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                <h3 className="text-white/70 text-xs uppercase tracking-widest font-medium">AI Refined Version</h3>
+              </div>
+              <p className="text-white/90 text-sm leading-relaxed whitespace-pre-wrap">{refineResult}</p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ─── Feedback Footer ──────────────────────────────────────────────── */}
+        <div className="max-w-4xl mx-auto mt-10 mb-2">
+          <div className="flex items-center justify-between px-2 py-4 border-t border-white/10">
+            <span className="text-white/30 text-xs uppercase tracking-wider">Was this output useful?</span>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onFeedback("up")}
+                className={`h-8 gap-1.5 text-xs border ${feedbackGiven === "up" ? "border-white/40 bg-white/10 text-white" : "border-white/10 text-white/40 hover:text-white hover:bg-white/5"}`}
+              >
+                <ThumbsUp className="w-3.5 h-3.5" /> Helpful
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onFeedback("down")}
+                className={`h-8 gap-1.5 text-xs border ${feedbackGiven === "down" ? "border-white/40 bg-white/10 text-white" : "border-white/10 text-white/40 hover:text-white hover:bg-white/5"}`}
+              >
+                <ThumbsDown className="w-3.5 h-3.5" /> Not quite
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onRegenerate}
+                className="h-8 gap-1.5 text-xs border border-white/10 text-white/40 hover:text-white hover:bg-white/5"
+              >
+                <RefreshCw className="w-3.5 h-3.5" /> Regenerate
+              </Button>
+            </div>
+          </div>
+        </div>
 
       </div>
     </div>
