@@ -1,0 +1,150 @@
+The tabs in my app (Strategy, Video, Brand, Influencer, Trends) are NOT displaying data. The UI shows fallback text like "Strategy data not fully available", which means the backend is not returning structured data correctly.
+
+Fix this properly by doing the following:
+
+---
+
+## 🔴 CORE ISSUE
+
+Right now the app depends on parsing a single LLM response using emoji sections. This is unreliable and breaking the UI.
+
+---
+
+## ✅ FIX: RETURN STRUCTURED JSON FROM LLM (VERY IMPORTANT)
+
+Update the LLM prompt so that it returns STRICT JSON instead of plain text.
+
+The response MUST follow this exact format:
+
+{
+"strategy": {
+"positioning": "",
+"audience_psychology": "",
+"key_message": ""
+},
+"brand": {
+"voice": "",
+"tone": "",
+"positioning": "",
+"usp": ""
+},
+"content": {
+"ideas": []
+},
+"video": {
+"scenes": [
+{
+"scene": 1,
+"duration": "",
+"visual": "",
+"voiceover": "",
+"text": ""
+}
+]
+},
+"influencer": {
+"types": [],
+"platforms": [],
+"ideas": []
+},
+"trends": {
+"hashtags": [],
+"formats": [],
+"insights": []
+}
+}
+
+---
+
+## ⚠️ IMPORTANT PROMPT RULES
+
+* Force the model to return ONLY valid JSON
+* No emojis
+* No extra text
+* No explanations
+* Use clear field names exactly as above
+
+---
+
+## 🔧 BACKEND CHANGES
+
+1. Remove emoji-based parsing logic
+2. Directly parse JSON:
+
+```js
+const data = JSON.parse(llmResponse);
+```
+
+3. Add validation:
+
+* If parsing fails → return error message
+
+4. Ensure API response sends ALL fields:
+
+```js
+res.json(data);
+```
+
+---
+
+## 🎨 FRONTEND FIX
+
+Update each tab to read correct fields:
+
+### Strategy Tab
+
+* strategy.positioning
+* strategy.audience_psychology
+* strategy.key_message
+
+### Brand Tab
+
+* brand.voice
+* brand.tone
+* brand.positioning
+* brand.usp
+
+### Video Tab
+
+* Loop through video.scenes
+
+### Influencer Tab
+
+* influencer.types
+* influencer.platforms
+* influencer.ideas
+
+### Trends Tab
+
+* trends.hashtags
+* trends.formats
+* trends.insights
+
+---
+
+## 🧪 TESTING
+
+After fixing:
+
+* Generate a campaign
+* Console.log API response
+* Confirm ALL fields exist
+* Confirm NO tab is empty
+
+---
+
+## 🚨 DO NOT:
+
+* Do NOT rely on string splitting
+* Do NOT use emojis anymore for parsing
+* Do NOT return partial data
+
+---
+
+## ✅ GOAL
+
+Every tab should ALWAYS display meaningful structured content.
+
+---
+
+Tell me exactly what you changed and show a sample API response.
