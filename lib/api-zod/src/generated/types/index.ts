@@ -15,6 +15,8 @@ export * from "./errorResponse";
 export * from "./generateCampaignBody";
 export * from "./healthStatus";
 export * from "./influencerResult";
+export * from "./refineCampaignBody";
+export * from "./refineCampaignResult";
 export * from "./strategyResult";
 export * from "./theme";
 export * from "./themeList";

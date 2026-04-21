@@ -15,4 +15,8 @@ export interface TrendStealerResult {
   soundSuggestions: string[];
   timingAdvice: string;
   predictedPlatforms: string[];
+  hashtagStrategy?: string;
+  hashtags?: string[];
+  viralFormats?: string[];
+  trendInsights?: string[];
 }

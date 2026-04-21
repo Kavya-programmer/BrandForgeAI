@@ -23,6 +23,8 @@ import type {
   GenerateCampaignBody,
   HealthStatus,
   InfluencerResult,
+  RefineCampaignBody,
+  RefineCampaignResult,
   StrategyResult,
   ThemeList,
   TrendStealerResult,
@@ -692,4 +694,90 @@ export const useTrendStealer = <
   TContext
 > => {
   return useMutation(getTrendStealerMutationOptions(options));
+};
+
+/**
+ * @summary Refine previously generated campaign content
+ */
+export const getRefineCampaignUrl = () => {
+  return `/api/campaign/refine`;
+};
+
+export const refineCampaign = async (
+  refineCampaignBody: RefineCampaignBody,
+  options?: RequestInit,
+): Promise<RefineCampaignResult> => {
+  return customFetch<RefineCampaignResult>(getRefineCampaignUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(refineCampaignBody),
+  });
+};
+
+export const getRefineCampaignMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof refineCampaign>>,
+    TError,
+    { data: BodyType<RefineCampaignBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof refineCampaign>>,
+  TError,
+  { data: BodyType<RefineCampaignBody> },
+  TContext
+> => {
+  const mutationKey = ["refineCampaign"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof refineCampaign>>,
+    { data: BodyType<RefineCampaignBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return refineCampaign(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RefineCampaignMutationResult = NonNullable<
+  Awaited<ReturnType<typeof refineCampaign>>
+>;
+export type RefineCampaignMutationBody = BodyType<RefineCampaignBody>;
+export type RefineCampaignMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Refine previously generated campaign content
+ */
+export const useRefineCampaign = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof refineCampaign>>,
+    TError,
+    { data: BodyType<RefineCampaignBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof refineCampaign>>,
+  TError,
+  { data: BodyType<RefineCampaignBody> },
+  TContext
+> => {
+  return useMutation(getRefineCampaignMutationOptions(options));
 };

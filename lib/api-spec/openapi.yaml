@@ -195,6 +195,37 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /campaign/refine:
+    post:
+      operationId: refineCampaign
+      tags: [campaign]
+      summary: Refine previously generated campaign content
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefineCampaignBody"
+      responses:
+        "200":
+          description: Refined campaign output
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefineCampaignResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -506,6 +537,20 @@ components:
           type: array
           items:
             type: string
+        hashtagStrategy:
+          type: string
+        hashtags:
+          type: array
+          items:
+            type: string
+        viralFormats:
+          type: array
+          items:
+            type: string
+        trendInsights:
+          type: array
+          items:
+            type: string
       required:
         - currentTrends
         - adaptedCampaign
@@ -514,6 +559,28 @@ components:
         - soundSuggestions
         - timingAdvice
         - predictedPlatforms
+
+    RefineCampaignBody:
+      type: object
+      properties:
+        previousResponse:
+          type: string
+        refinement:
+          type: string
+        brand:
+          type: string
+        theme:
+          type: string
+      required: [previousResponse, refinement]
+
+    RefineCampaignResult:
+      type: object
+      properties:
+        refinedContent:
+          type: string
+        refinement:
+          type: string
+      required: [refinedContent, refinement]
 
     TrendItem:
       type: object

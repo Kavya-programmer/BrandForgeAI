@@ -1,4 +1,4 @@
-import type { CampaignResult } from "@workspace/api-client-react/src/generated/api.schemas";
+import type { CampaignResult } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
@@ -123,7 +123,7 @@ export function CampaignOutput({ result, isGenerating }: CampaignOutputProps) {
             <CardContent className="p-6">
               <div className="prose prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-muted/50 prose-pre:border prose-pre:border-border/50">
                 {/* Basic text formatting to handle line breaks simply */}
-                {section.content.split('\n').map((paragraph, i) => (
+                {section.content.split('\n').map((paragraph: string, i: number) => (
                   paragraph.trim() ? <p key={i} className="mb-4 last:mb-0 text-card-foreground/90">{paragraph}</p> : <br key={i} />
                 ))}
               </div>

@@ -131,6 +131,22 @@ export interface TrendStealerResult {
   soundSuggestions: string[];
   timingAdvice: string;
   predictedPlatforms: string[];
+  hashtagStrategy?: string;
+  hashtags?: string[];
+  viralFormats?: string[];
+  trendInsights?: string[];
+}
+
+export interface RefineCampaignBody {
+  previousResponse: string;
+  refinement: string;
+  brand?: string;
+  theme?: string;
+}
+
+export interface RefineCampaignResult {
+  refinedContent: string;
+  refinement: string;
 }
 
 export interface Theme {

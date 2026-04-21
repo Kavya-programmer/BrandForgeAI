@@ -196,4 +196,23 @@ export const TrendStealerResponse = zod.object({
   soundSuggestions: zod.array(zod.string()),
   timingAdvice: zod.string(),
   predictedPlatforms: zod.array(zod.string()),
+  hashtagStrategy: zod.string().optional(),
+  hashtags: zod.array(zod.string()).optional(),
+  viralFormats: zod.array(zod.string()).optional(),
+  trendInsights: zod.array(zod.string()).optional(),
+});
+
+/**
+ * @summary Refine previously generated campaign content
+ */
+export const RefineCampaignBody = zod.object({
+  previousResponse: zod.string(),
+  refinement: zod.string(),
+  brand: zod.string().optional(),
+  theme: zod.string().optional(),
+});
+
+export const RefineCampaignResponse = zod.object({
+  refinedContent: zod.string(),
+  refinement: zod.string(),
 });

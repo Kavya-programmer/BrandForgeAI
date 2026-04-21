@@ -133,6 +133,20 @@ function getEstimatedViews(score: number): string {
   return "50K–100K views likely";
 }
 
+function normalizeBulletPoints(value: unknown): string {
+  if (typeof value !== "string" || !value.trim()) return "Not available";
+  const lines = value
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const cleaned = line.replace(/^[-*•\d.)\s]+/, "").trim();
+      return cleaned ? `• ${cleaned}` : "";
+    })
+    .filter(Boolean);
+  return lines.length > 0 ? lines.join("\n") : "Not available";
+}
+
 // ─── GET /campaign/themes ──────────────────────────────────────────────────────
 router.get("/campaign/themes", (_req, res) => {
   res.json({ themes: THEMES });
@@ -153,55 +167,101 @@ router.post("/campaign/generate", async (req, res) => {
     const client = getGroqClient();
     const data = await callGroqJSON<{
       campaignIdea: string;
-      strategy: string;
-      adScript: string;
+      keyMessage: string;
+      coreStrategy: string;
       socialContent: string;
       videoStoryboard: string;
-      keyMessage: string;
+      adScript: string;
+      brandPositioning: string;
+      influencerAngles: string;
     }>(
       client,
-      `You are a world-class marketing strategist. You MUST respond with ONLY valid JSON. No explanations, no text outside the JSON object.`,
+      `You are a structured marketing generation engine.
+You MUST ALWAYS return a valid JSON object in the exact schema below.
+NO EXTRA KEYS.
+NO TEXT OUTSIDE JSON.
+Return ALL fields. Use "Not available" for missing values.
+
+Required schema:
+{
+  "campaignIdea": "string",
+  "keyMessage": "string",
+  "coreStrategy": "string (• bullets only)",
+  "socialContent": "string",
+  "videoStoryboard": "string",
+  "adScript": "string",
+  "brandPositioning": "string",
+  "influencerAngles": "string",
+  "viralityScore": 0,
+  "viralityExplanation": "string",
+  "estimatedViews": "string"
+}`,
       `Create a complete viral marketing campaign for:
 Brand: ${brand}
 Product/Service: ${product}
 Target Audience: ${audience}
 Campaign Theme: ${themeLabel}
+Tone: Marketing agency, high-end storytelling, emotional + aspirational, Gen Z + professional hybrid.
 
-Respond with ONLY this JSON structure (all fields required, no null values):
+Respond with ONLY this JSON structure:
 {
-  "campaignIdea": "1 powerful campaign concept in 3 sentences with a strong hook, emotional angle, and clear CTA",
-  "keyMessage": "The single core message this campaign drives home in 1 sentence",
-  "strategy": "5-6 bullet points covering platform strategy for Instagram/TikTok/YouTube, virality hooks, psychological angles, emotional triggers, and content cadence. Use • for each bullet.",
-  "adScript": "Full scene-by-scene ad script with SCENE labels, dialogue, visuals, and emotion. Include strong opening hook and closing CTA.",
-  "socialContent": "Instagram caption with 10 hashtags. Then TikTok caption optimized for FYP. Then 3 tweet ideas. Then LinkedIn version.",
-  "videoStoryboard": "Numbered storyboard for 15-30 sec ad. For each scene include: Scene number, Duration, Visual description, Camera angle, Audio note, Text overlay."
+  "campaignIdea": "string",
+  "keyMessage": "string",
+  "coreStrategy": "• bullet one\\n• bullet two\\n• bullet three",
+  "socialContent": "Instagram caption... TikTok caption... Tweet ideas...",
+  "videoStoryboard": "string",
+  "adScript": "string",
+  "brandPositioning": "string",
+  "influencerAngles": "string",
+  "viralityScore": 0,
+  "viralityExplanation": "string",
+  "estimatedViews": "string"
 }`
     );
 
-    const raw = JSON.stringify(data);
+    const raw = JSON.stringify(data ?? {});
     const viralityScore = computeViralityScore(raw, theme);
     const result = {
-      campaignIdea: data.campaignIdea || "Campaign concept could not be generated. Please try again.",
-      keyMessage: data.keyMessage || "",
-      strategy: data.strategy || "",
-      adScript: data.adScript || "",
-      socialContent: data.socialContent || "",
-      videoStoryboard: data.videoStoryboard || "",
-      viralityScore,
-      viralityExplanation: `This campaign scores ${viralityScore}/100 based on hook strength, CTA presence, emotional resonance, and platform alignment for ${themeLabel}.`,
-      estimatedViews: getEstimatedViews(viralityScore),
-      adsFactory: {
-        thumbnailPrompt: `Ultra-HD thumbnail for ${brand}: ${themeLabel} aesthetic, ${audience}, cinematic lighting, bold typography, scroll-stopping`,
-        bestPostingTimes: ["Tuesday 6–9 PM", "Thursday 7–10 PM", "Saturday 10 AM–12 PM"],
-        platforms: ["TikTok", "Instagram Reels", "YouTube Shorts"],
-        hashtagSets: {
-          instagram: [`#${brand.replace(/\s/g, "")}`, "#MarketingTips", "#BrandStrategy", "#ContentCreator", "#ViralMarketing"],
-          tiktok: [`#${brand.replace(/\s/g, "")}`, "#FYP", "#ForYouPage", "#MarketingTikTok", "#BrandTok"],
-        },
-      },
-      theme,
-      brand,
+      campaignIdea:
+        typeof data.campaignIdea === "string" && data.campaignIdea.trim()
+          ? data.campaignIdea
+          : "Not available",
+      keyMessage:
+        typeof data.keyMessage === "string" && data.keyMessage.trim()
+          ? data.keyMessage
+          : "Not available",
+      coreStrategy: normalizeBulletPoints(data.coreStrategy),
+      socialContent:
+        typeof data.socialContent === "string" && data.socialContent.trim()
+          ? data.socialContent
+          : "Not available",
+      videoStoryboard:
+        typeof data.videoStoryboard === "string" && data.videoStoryboard.trim()
+          ? data.videoStoryboard
+          : "Not available",
+      adScript:
+        typeof data.adScript === "string" && data.adScript.trim()
+          ? data.adScript
+          : "Not available",
+      brandPositioning:
+        typeof data.brandPositioning === "string" && data.brandPositioning.trim()
+          ? data.brandPositioning
+          : "Not available",
+      influencerAngles:
+        typeof data.influencerAngles === "string" && data.influencerAngles.trim()
+          ? data.influencerAngles
+          : "Not available",
+      viralityScore: Math.max(0, Math.min(100, Math.round(viralityScore))),
+      viralityExplanation:
+        typeof data.viralityExplanation === "string" && data.viralityExplanation.trim()
+          ? data.viralityExplanation
+          : `This campaign scores ${viralityScore}/100 based on hook strength, CTA presence, emotional resonance, and platform alignment for ${themeLabel}.`,
+      estimatedViews:
+        typeof data.estimatedViews === "string" && data.estimatedViews.trim()
+          ? data.estimatedViews
+          : getEstimatedViews(viralityScore),
     };
+    req.log.info({ payload: result }, "[Campaign API] /campaign/generate response payload");
     setCache(cacheKey, result);
     res.json(result);
   } catch (err) {
@@ -266,6 +326,7 @@ Respond with ONLY this JSON structure (all fields required, no null values):
       viralityExplanation: `Based on hook strength, CTA presence, emotional resonance, and platform fit for ${themeLabel}, this strategy scores ${viralityScore}/100.`,
       estimatedViews: getEstimatedViews(viralityScore),
     };
+    req.log.info({ payload: result }, "[Campaign API] /campaign/generate-strategy response payload");
     setCache(cacheKey, result);
     res.json(result);
   } catch (err) {
@@ -377,6 +438,7 @@ Respond with ONLY this JSON structure (all fields required):
         memeVersion: data.versions?.memeVersion || "",
       },
     };
+    req.log.info({ payload: result }, "[Campaign API] /campaign/generate-video-plan response payload");
     setCache(cacheKey, result);
     res.json(result);
   } catch (err) {
@@ -464,6 +526,7 @@ Respond with ONLY this JSON structure (all fields required, no null values):
       aestheticDirection: data.aestheticDirection || "",
       moodboardKeywords: Array.isArray(data.moodboardKeywords) ? data.moodboardKeywords.slice(0, 10) : [],
     };
+    req.log.info({ payload: result }, "[Campaign API] /campaign/generate-brand response payload");
     setCache(cacheKey, result);
     res.json(result);
   } catch (err) {
@@ -547,6 +610,7 @@ Respond with ONLY this JSON structure (all fields required):
       collaborationIdeas: Array.isArray(data.collaborationIdeas) && data.collaborationIdeas.length > 0 ? data.collaborationIdeas.slice(0, 3) : [`Organic product integration for ${brand}`],
       sampleCaptions: Array.isArray(data.sampleCaptions) && data.sampleCaptions.length > 0 ? data.sampleCaptions.slice(0, 3) : [`Obsessed with @${brand} right now.`],
     };
+    req.log.info({ payload: result }, "[Campaign API] /campaign/generate-influencer response payload");
     setCache(cacheKey, result);
     res.json(result);
   } catch (err) {
@@ -619,11 +683,16 @@ Respond with ONLY this JSON structure (all fields required):
       trendHooks: Array.isArray(data.trendHooks) && data.trendHooks.length > 0 ? data.trendHooks : [`The ${brand} trend no one is talking about yet`],
       viralFormula: data.viralFormula || "",
       soundSuggestions: Array.isArray(data.soundSuggestions) && data.soundSuggestions.length > 0 ? data.soundSuggestions : ["Trending pop beat", "Viral audio clip"],
+      timingAdvice: data.hashtagStrategy || "Post during peak engagement windows for each platform and iterate with trend velocity.",
+      predictedPlatforms: Array.isArray(data.viralFormats) && data.viralFormats.length > 0
+        ? data.viralFormats.slice(0, 3)
+        : ["TikTok", "Instagram Reels", "YouTube Shorts"],
       hashtagStrategy: data.hashtagStrategy || "",
       hashtags: Array.isArray(data.hashtags) && data.hashtags.length > 0 ? data.hashtags : [`#${brand.replace(/\s/g, "")}`, "#FYP", "#Trending"],
       viralFormats: Array.isArray(data.viralFormats) && data.viralFormats.length > 0 ? data.viralFormats : ["Short-form video", "Carousel post"],
       trendInsights: Array.isArray(data.trendInsights) && data.trendInsights.length > 0 ? data.trendInsights : ["Audiences respond to authenticity", "Short hooks drive higher completion rates"],
     };
+    req.log.info({ payload: result }, "[Campaign API] /campaign/trend-stealer response payload");
     setCache(cacheKey, result);
     res.json(result);
   } catch (err) {
@@ -651,6 +720,10 @@ router.post("/campaign/refine", async (req, res) => {
       `Refine the above marketing content based on this specific feedback: ${refinement}
 ${brand ? `Brand: ${brand}` : ""}${themeLabel ? `\nStyle: ${themeLabel}` : ""}
 Keep the same overall structure but make it better and more impactful. Output the complete improved version.`
+    );
+    req.log.info(
+      { payload: { refinedContent: refined, refinement } },
+      "[Campaign API] /campaign/refine response payload",
     );
     res.json({ refinedContent: refined, refinement });
   } catch (err) {

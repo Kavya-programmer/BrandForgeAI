@@ -2,7 +2,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useGetThemes, getGetThemesQueryKey } from "@workspace/api-client-react";
-import type { GenerateCampaignBody } from "@workspace/api-client-react/src/generated/api.schemas";
+import type { GenerateCampaignBody } from "@workspace/api-client-react";
 
 import {
   Form,
