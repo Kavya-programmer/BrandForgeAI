@@ -1,6 +1,7 @@
 import Groq from "groq-sdk";
 
 export interface CampaignResponse {
+  // Common fields
   campaignIdea: string;
   keyMessage: string;
   coreStrategy: string;
@@ -11,106 +12,107 @@ export interface CampaignResponse {
   influencerAngles: string;
   viralityScore: number;
   estimatedViews: string;
+
+  // Strategy specific
+  positioning?: string;
+  audiencePsychology?: string;
+  viralHooks?: string[];
+  sloganIdeas?: string[];
+  competitorAngle?: string;
+  platformStrategy?: string;
+
+  // Video specific
+  scenes?: Array<{
+    sceneNumber: number;
+    visual: string;
+    audio: string;
+  }>;
+
+  // Brand specific
+  brandArchetype?: string;
+  brandVoice?: string;
+  colorPalette?: string[];
+
+  // Influencer specific
+  selectedInfluencerName?: string;
+  brandCollabAngle?: string;
 }
 
+export interface ApiResponse<T = CampaignResponse> {
+  error: boolean;
+  message: string;
+  data: T | null;
+}
+
+/* ---------------- THEMES ---------------- */
+
 export const THEMES = [
-  { id: "luxury", label: "Luxury / Emily in Paris", description: "Elegant, aspirational, cinematic — romantic branding and emotional storytelling" },
-  { id: "genz_viral", label: "Gen Z Viral TikTok", description: "Fast-paced, trendy, raw, authentic — built for algorithm virality" },
-  { id: "corporate", label: "Corporate Professional", description: "Clean, trustworthy, data-driven — perfect for B2B and enterprise brands" },
-  { id: "emotional", label: "Emotional Storytelling", description: "Heartfelt, narrative-driven, tear-jerking — connects on a human level" },
-  { id: "minimal_apple", label: "Minimal Apple Style", description: "Sleek, product-focused, whisper-quiet elegance — let the product speak" },
-  { id: "high_energy_sports", label: "High Energy Sports", description: "Explosive, motivational, fast cuts — built for athletes and action brands" },
-  { id: "trend_stealer", label: "Trend Stealer Mode", description: "Hijacks viral trends and adapts them to your brand instantly" },
-  { id: "ai_influencer", label: "AI Influencer Mode", description: "Creates fictional influencer persona campaigns" },
+  { id: "luxury", label: "Luxury / Emily in Paris", description: "Elegant storytelling" },
+  { id: "genz_viral", label: "Gen Z Viral TikTok", description: "Fast viral content" },
+  { id: "corporate", label: "Corporate Professional", description: "B2B focused" },
+  { id: "emotional", label: "Emotional Storytelling", description: "Narrative driven" },
+  { id: "minimal_apple", label: "Minimal Apple Style", description: "Clean premium design" },
+  { id: "high_energy_sports", label: "High Energy Sports", description: "Explosive motivation" },
+  { id: "trend_stealer", label: "Trend Stealer Mode", description: "Trend hijacking" },
+  { id: "ai_influencer", label: "AI Influencer Mode", description: "AI persona campaigns" },
 ];
 
 export const CURATED_INFLUENCERS = [
-  {
-    name: "Cristiano Ronaldo",
-    handle: "@cristiano",
-    age: 39,
-    location: "Riyadh, Saudi Arabia",
-    audienceSize: "600M+ followers",
-    bio: "Global sports icon",
-    aesthetic: "Athletic premium",
-    contentStyle: "Sports + lifestyle",
-    platforms: ["Instagram"],
-    influencerTypes: ["Sports"],
-    contentPillars: ["Football"]
-  },
-  {
-    name: "Emma Chamberlain",
-    handle: "@emmachamberlain",
-    age: 23,
-    location: "Los Angeles, CA",
-    audienceSize: "16M+ followers",
-    bio: "anything goes podcast",
-    aesthetic: "Gen Z relatable",
-    contentStyle: "Raw vlogs",
-    platforms: ["YouTube"],
-    influencerTypes: ["Lifestyle"],
-    contentPillars: ["Fashion"]
-  }
+  { name: "Alex Rivers", handle: "@arivers", audience: "2.4M", niche: "Lifestyle & Tech", aesthetic: "Minimalist High-End" },
+  { name: "Sarah Zen", handle: "@zen_sarah", audience: "850K", niche: "Wellness & Productivity", aesthetic: "Earth Tone / Organic" },
+  { name: "Jordan Byte", handle: "@j_byte", audience: "1.2M", niche: "Gaming & Gen-Z Culture", aesthetic: "Neon / High Energy" },
+  { name: "Elena Luxe", handle: "@elena_luxe", audience: "3.1M", niche: "Luxury Fashion", aesthetic: "Old Money / Paris" },
+  { name: "Marcus Fit", handle: "@marcusfit", audience: "1.8M", niche: "Athletics & Biohacking", aesthetic: "Gritty / Cinematic" },
 ];
+
+/* ---------------- GROQ CLIENT ---------------- */
 
 export function getGroqClient(): Groq | null {
   const key = process.env.GROQ_API_KEY;
-
   if (!key) {
     console.error("❌ GROQ_API_KEY missing");
     return null;
   }
-
   return new Groq({ apiKey: key });
 }
+
+/* ---------------- THEME ---------------- */
 
 export function getThemeLabel(id: string): string {
   return THEMES.find((t) => t.id === id)?.label ?? id;
 }
 
-/**
- * 🔥 SAFE JSON PARSER (prevents UI breaking)
- */
-function safeParseJSON(raw: string, fallbackType?: string, fallbackContext?: any) {
+/* ---------------- SAFE PARSER ---------------- */
+
+function safeParse(raw: string) {
   try {
-    return JSON.parse(raw);
-  } catch (err) {
-    console.error("❌ INVALID JSON FROM GROQ:", raw);
-
-    if (fallbackType) {
-      return getFallbackResponse(fallbackType, fallbackContext);
-    }
-
-    throw new Error("INVALID_JSON_FROM_GROQ");
+    // Basic cleanup in case AI includes markdown markers
+    const jsonStr = raw.replace(/^```json\n?/, "").replace(/\n?```$/, "").trim();
+    return JSON.parse(jsonStr);
+  } catch {
+    console.error("❌ INVALID JSON:", raw);
+    return null;
   }
 }
 
-export async function callGroqJSON<T = Record<string, unknown>>(
+/* ---------------- MAIN GROQ CALL ---------------- */
+
+export async function callGroqJSON<T>(
   client: Groq | null,
   systemPrompt: string,
   userPrompt: string,
-  fallbackType?: string,
-  fallbackContext?: any,
   maxRetries = 2
-): Promise<T> {
+): Promise<T | null> {
+  if (!client) return null;
 
-  if (!client) {
-    console.log("⚠️ NO GROQ CLIENT → fallback used");
-    return getFallbackResponse(fallbackType || "strategy", fallbackContext) as T;
-  }
-
-  let lastError: any;
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+  for (let i = 0; i < maxRetries; i++) {
     try {
-      const completion = await client.chat.completions.create({
+      const res = await client.chat.completions.create({
         model: "llama-3.3-70b-versatile",
         messages: [
           {
             role: "system",
-            content:
-              systemPrompt +
-              "\n\nIMPORTANT: Return ONLY valid JSON. No text, no markdown."
+            content: systemPrompt + "\nCRITICAL: Return ONLY valid JSON. No conversational text. No explanations."
           },
           { role: "user", content: userPrompt }
         ],
@@ -119,125 +121,72 @@ export async function callGroqJSON<T = Record<string, unknown>>(
         max_tokens: 3500,
       });
 
-      const raw = completion.choices[0]?.message?.content ?? "";
-
-      const parsed = safeParseJSON(raw, fallbackType, fallbackContext);
-
-      console.log("✅ GROQ SUCCESS");
-
-      return parsed as T;
-
+      const raw = res.choices[0]?.message?.content || "";
+      const parsed = safeParse(raw);
+      if (parsed) return parsed as T;
     } catch (err) {
-      console.error("❌ GROQ ERROR:", err);
-      lastError = err;
-
-      if (attempt < maxRetries) {
-        console.log("🔁 RETRYING GROQ...");
-        await new Promise((r) => setTimeout(r, 1000));
-      }
+      console.error("❌ GROQ ATTEMPT ERROR:", err);
     }
   }
-
-  console.log("⚠️ ALL RETRIES FAILED → fallback");
-
-  return getFallbackResponse(fallbackType || "strategy", fallbackContext) as T;
+  return null;
 }
 
-/**
- * 🔥 GUARANTEED UI SAFE FALLBACKS
- */
-export function getFallbackResponse(type: string, context: any = {}): CampaignResponse {
-  const brand = context.brand || "Brand";
-  const product = context.product || "Product";
-  const audience = context.audience || "Audience";
+/* ---------------- VIRALITY ---------------- */
 
-  const base = {
-    campaignIdea: `The ${brand} Transformation: A bold approach to ${product} for ${audience}.`,
-    keyMessage: `${brand} delivers quality and innovation.`,
-    coreStrategy: "• Market disruption\n• High engagement content\n• Community building",
-    socialContent: "Daily authentic updates and user testimonials.",
-    videoStoryboard: "Scene 1: Problem. Scene 2: Product Solution. Scene 3: CTA.",
-    adScript: "Stop settling for less. Experience the best with ${brand}.",
-    brandPositioning: "Premium leader in the space.",
-    influencerAngles: "Authentic lifestyle and expert reviews.",
-    viralityScore: 75,
-    estimatedViews: "100K–500K views likely"
-  };
+export function computeViralityScore(text: string, theme: string): number {
+  const t = text.toLowerCase();
+  const keywords = ["viral", "pov", "secret", "stop", "imagine", "truth", "hack", "algorithm"];
+  const hooks = keywords.filter(w => t.includes(w)).length;
 
-  if (type === "strategy") {
-    return {
-      ...base,
-      campaignIdea: `Strategic positioning for ${brand} in the ${product} market.`,
-      brandPositioning: `${brand} is the premier solution for ${audience}.`,
-      coreStrategy: "• Focus on quality\n• Emphasize durability\n• Target niche communities"
-    };
-  }
+  let score = 50 + hooks * 6;
+  if (theme === "genz_viral" || theme === "trend_stealer") score += 15;
 
-  if (type === "influencer") {
-    const influencer = CURATED_INFLUENCERS[0];
-    return {
-      ...base,
-      influencerAngles: `Aligning with ${influencer.name} to reach ${audience}. Angle: Authentic lifestyle integration.`
-    };
-  }
-
-  if (type === "video-plan") {
-    return {
-      ...base,
-      videoStoryboard: "Scene 1: Epic reveal. Scene 2: Feature demo. Scene 3: Social proof.",
-      adScript: "This is the video script for the next big thing."
-    };
-  }
-
-  if (type === "trend-stealer") {
-    return {
-      ...base,
-      campaignIdea: "Trend-jacking current viral movements.",
-      coreStrategy: "• Identify trends early\n• Adapt quickly\n• High-frequency posting"
-    };
-  }
-
-  return base;
-}
-
-export function computeViralityScore(content: string, theme: string): number {
-  const lower = content.toLowerCase();
-  const hooks = ["imagine", "the secret", "here's why", "stop doing", "viral", "pov", "truth"].filter(p => lower.includes(p)).length * 5;
-  let base = 50 + hooks + Math.floor(Math.random() * 10);
-  if (theme === "genz_viral" || theme === "trend_stealer") base += 15;
-  return Math.min(Math.max(base, 40), 99);
+  return Math.min(99, Math.max(45, score));
 }
 
 export function getEstimatedViews(score: number): string {
-  if (score >= 90) return "5M–20M+ views likely";
-  if (score >= 80) return "1M–5M views likely";
-  if (score >= 70) return "500K–1M views likely";
-  return "100K–500K views likely";
+  if (score > 90) return "5M–20M+ views";
+  if (score > 80) return "1M–5M views";
+  if (score > 70) return "500K–1M views";
+  return "100K–500K views";
 }
 
-export function normalizeBulletPoints(value: unknown): string {
-  if (Array.isArray(value)) {
-    return value.map(l => `• ${String(l).trim()}`).join("\n");
+/* ---------------- BULLETS ---------------- */
+
+export function normalizeBulletPoints(v: any): string {
+  if (Array.isArray(v)) return v.map(i => `• ${String(i).trim()}`).join("\n");
+  if (typeof v === "string" && v.trim()) {
+    if (v.includes("•")) return v;
+    return v.split("\n").filter(Boolean).map(l => `• ${l.trim()}`).join("\n");
   }
-  if (typeof value !== "string" || !value) return "• High impact strategy\n• Market disruption\n• Community engagement";
-  return value.split("\n").filter(Boolean).map(l => `• ${l.replace(/^[-*•\d.)\s]+/, "").trim()}`).join("\n");
+  return "• High-impact rollout\n• Targeted engagement\n• Conversion-led strategy";
 }
 
-/**
- * 🔥 UNIFY RESPONSE (Ensures all data matches CampaignResponse interface)
- */
+/* ---------------- UNIFY RESPONSE ---------------- */
+
 export function unifyResponse(data: any, brand: string, product: string, audience: string, theme: string): CampaignResponse {
   const score = computeViralityScore(JSON.stringify(data), theme);
-  
+
+  // Map specialized fields back to common fields for consistency
+  const campaignIdea = data.campaignIdea || data.positioning || data.adaptedCampaign || `Viral strategy for ${brand}`;
+  const keyMessage = data.keyMessage || data.tagline || `Revolutionizing ${product}`;
+  const coreStrategy = normalizeBulletPoints(data.coreStrategy || data.platformStrategy || data.viralFormula || data.strategy);
+  const socialContent = data.socialContent || (Array.isArray(data.sloganIdeas) ? data.sloganIdeas.join("\n") : data.brandVoice) || "Social media roadmap";
+  const videoStoryboard = data.videoStoryboard || (Array.isArray(data.scenes) ? data.scenes.map((s:any) => s.visual).join("\n") : "Cinematic production plan");
+  const adScript = data.adScript || data.script || "Persuasive marketing copy";
+  const brandPositioning = data.brandPositioning || data.positioning || data.brandArchetype || "Premium market positioning";
+  const influencerAngles = data.influencerAngles || data.brandCollabAngle || "Strategic creator partnership";
+
   return {
-    campaignIdea: typeof data.campaignIdea === 'string' ? data.campaignIdea : (data.positioning || data.adaptedCampaign || `The ${brand} campaign for ${audience}.`),
-    keyMessage: typeof data.keyMessage === 'string' ? data.keyMessage : (data.tagline || `${brand}: The choice for ${audience}.`),
-    coreStrategy: normalizeBulletPoints(data.coreStrategy || data.viralHooks || data.platformStrategy || data.uniqueSellingPoints),
-    socialContent: typeof data.socialContent === 'string' ? data.socialContent : (data.brandVoice || (Array.isArray(data.collaborationIdeas) ? data.collaborationIdeas.join("\n") : "Social strategy pending.")),
-    videoStoryboard: typeof data.videoStoryboard === 'string' ? data.videoStoryboard : (Array.isArray(data.scenes) ? data.scenes.map((s:any) => s.visual).join(" | ") : "Cinematic video sequence."),
-    adScript: typeof data.adScript === 'string' ? data.adScript : (data.script || data.sampleCaptions?.[0] || "High-converting ad copy."),
-    brandPositioning: typeof data.brandPositioning === 'string' ? data.brandPositioning : (data.positioning || data.brandArchetype || "Premium market leader."),
-    influencerAngles: typeof data.influencerAngles === 'string' ? data.influencerAngles : (data.brandCollabAngle || data.selectedInfluencerName || "Strategic influencer partnerships."),
+    ...data, // Keep original fields for specialized panels
+    campaignIdea,
+    keyMessage,
+    coreStrategy,
+    socialContent,
+    videoStoryboard,
+    adScript,
+    brandPositioning,
+    influencerAngles,
     viralityScore: score,
     estimatedViews: getEstimatedViews(score)
   };

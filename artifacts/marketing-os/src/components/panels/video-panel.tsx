@@ -33,6 +33,8 @@ const VERSION_LABELS = [
 
 export function VideoPanel({ data, videoUrl }: VideoPanelProps) {
   const [expandedTool, setExpandedTool] = useState<string | null>(null);
+  const scenes = Array.isArray(data.scenes) ? data.scenes : [];
+  const script = data.script || data.adScript || "Video script pending generation.";
 
   return (
     <motion.div variants={STAGGER.container} initial="hidden" animate="show" className="space-y-4">
@@ -44,10 +46,10 @@ export function VideoPanel({ data, videoUrl }: VideoPanelProps) {
           <div className="terminal-dot bg-yellow-500/80" />
           <div className="terminal-dot bg-green-500/80" />
           <span className="ml-2 text-[11px] text-muted-foreground flex-1">voiceover-script.txt</span>
-          <CopyButton text={data.script} />
+          <CopyButton text={script} />
         </div>
         <div className="px-5 py-4 max-h-52 overflow-y-auto">
-          <pre className="text-sm leading-relaxed text-emerald-300/90 whitespace-pre-wrap font-mono">{data.script}</pre>
+          <pre className="text-sm leading-relaxed text-emerald-300/90 whitespace-pre-wrap font-mono">{script}</pre>
         </div>
       </motion.div>
 
@@ -57,14 +59,14 @@ export function VideoPanel({ data, videoUrl }: VideoPanelProps) {
           <Film className="w-4 h-4 text-blue-400" />
           <span className="section-label">Scene Timeline</span>
           <CopyButton
-            text={data.scenes.map((s) => `Scene ${s.sceneNumber} (${s.duration}): ${s.visual} | ${s.audio}`).join("\n")}
+            text={scenes.map((s) => `Scene ${s.sceneNumber} (${s.duration}): ${s.visual} | ${s.audio}`).join("\n")}
             className="ml-auto"
           />
         </div>
         <div className="p-4 space-y-3">
-          {data.scenes.map((scene, i) => (
+          {scenes.length > 0 ? scenes.map((scene, i) => (
             <motion.div
-              key={scene.sceneNumber}
+              key={scene.sceneNumber || i}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.1 }}
@@ -75,7 +77,7 @@ export function VideoPanel({ data, videoUrl }: VideoPanelProps) {
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0">
                   <span className="text-xs font-bold text-white">{scene.sceneNumber}</span>
                 </div>
-                {i < data.scenes.length - 1 && (
+                {i < scenes.length - 1 && (
                   <div className="w-px h-full min-h-[12px] bg-border/60 mt-1 mb-0" />
                 )}
               </div>
@@ -83,9 +85,9 @@ export function VideoPanel({ data, videoUrl }: VideoPanelProps) {
               {/* Scene content */}
               <div className="flex-1 pb-3">
                 <div className="flex items-center gap-2 mb-1.5">
-                  <span className="chip chip-primary">{scene.duration}</span>
+                  <span className="chip chip-primary">{scene.duration || "5s"}</span>
                   <span className="text-[11px] text-muted-foreground flex items-center gap-1">
-                    <Camera className="w-3 h-3" /> {scene.cameraAngle}
+                    <Camera className="w-3 h-3" /> {scene.cameraAngle || "Medium Shot"}
                   </span>
                 </div>
                 <p className="text-sm text-foreground/90 leading-relaxed mb-1">{scene.visual}</p>
@@ -98,7 +100,9 @@ export function VideoPanel({ data, videoUrl }: VideoPanelProps) {
                 )}
               </div>
             </motion.div>
-          ))}
+          )) : (
+            <p className="text-sm text-muted-foreground italic px-2">Visual storyboard pending.</p>
+          )}
         </div>
       </motion.div>
 
@@ -108,18 +112,18 @@ export function VideoPanel({ data, videoUrl }: VideoPanelProps) {
           { icon: Music, label: "Music Direction", content: data.musicStyle, color: "text-pink-400" },
           { icon: Scissors, label: "Editing Style", content: data.editingStyle, color: "text-cyan-400" },
           { icon: Type, label: "Captions", content: data.captionsText, color: "text-amber-400" },
-        ].map(({ icon: Icon, label, content, color }) => content ? (
+        ].map(({ icon: Icon, label, content, color }) => (
           <motion.div key={label} variants={STAGGER.item} className="glass rounded-2xl border border-border/60 p-4">
             <div className="flex items-center gap-2 mb-2">
               <Icon className={cn("w-3.5 h-3.5", color)} />
               <span className="section-label">{label}</span>
             </div>
             <div className="flex justify-between items-start gap-2">
-              <p className="text-xs text-foreground/85 leading-relaxed flex-1">{content}</p>
-              <CopyButton text={content} className="shrink-0" />
+              <p className="text-xs text-foreground/85 leading-relaxed flex-1">{content || "Pending..."}</p>
+              <CopyButton text={content || ""} className="shrink-0" />
             </div>
           </motion.div>
-        ) : null)}
+        ))}
       </div>
 
       {/* AI Tool Prompts */}
@@ -131,7 +135,6 @@ export function VideoPanel({ data, videoUrl }: VideoPanelProps) {
         <div className="divide-y divide-border/40">
           {AI_TOOLS.map((tool) => {
             const content = data[tool.key as keyof VideoPlanResult] as string;
-            if (!content) return null;
             const isOpen = expandedTool === tool.key;
             return (
               <div key={tool.key}>
@@ -163,9 +166,9 @@ export function VideoPanel({ data, videoUrl }: VideoPanelProps) {
                             <div className="terminal-dot bg-yellow-500/50" />
                             <div className="terminal-dot bg-green-500/50" />
                             <span className="ml-2 text-[10px] text-muted-foreground flex-1">prompt</span>
-                            <CopyButton text={content} />
+                            <CopyButton text={content || ""} />
                           </div>
-                          <pre className="px-4 py-3 text-xs text-emerald-300/80 leading-relaxed whitespace-pre-wrap">{content}</pre>
+                          <pre className="px-4 py-3 text-xs text-emerald-300/80 leading-relaxed whitespace-pre-wrap">{content || "Prompt not available yet."}</pre>
                         </div>
                       </div>
                     </motion.div>
@@ -185,18 +188,17 @@ export function VideoPanel({ data, videoUrl }: VideoPanelProps) {
         </div>
         <div className="divide-y divide-border/40">
           {VERSION_LABELS.map(({ key, label, gradient }) => {
-            const v = data.versions as unknown as Record<string, string>;
+            const v = (data.versions || {}) as Record<string, string>;
             const content = v[key];
-            if (!content) return null;
             return (
               <div key={key} className="px-5 py-4">
                 <div className="flex items-center justify-between mb-2.5">
                   <div className={`inline-flex items-center px-3 py-1 rounded-lg bg-gradient-to-r ${gradient} text-xs font-semibold text-white`}>
                     {label}
                   </div>
-                  <CopyButton text={content} />
+                  <CopyButton text={content || ""} />
                 </div>
-                <p className="text-sm text-foreground/85 leading-relaxed">{content}</p>
+                <p className="text-sm text-foreground/85 leading-relaxed">{content || "Platform-specific version pending."}</p>
               </div>
             );
           })}

@@ -1,36 +1,52 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getGroqClient, callGroqJSON, getThemeLabel, CURATED_INFLUENCERS, getFallbackResponse, unifyResponse } from "../../src/lib/campaign-logic.js";
+import {
+  getGroqClient,
+  callGroqJSON,
+  getThemeLabel,
+  CURATED_INFLUENCERS,
+  unifyResponse
+} from "../../src/lib/campaign-logic.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     if (req.method !== "POST") {
-      return res.status(405).json({ error: true, message: "Method not allowed", code: "METHOD_NOT_ALLOWED" });
+      return res.status(405).json({
+        error: true,
+        message: "Method not allowed",
+        data: null
+      });
     }
 
-    const body = req.body || {};
-    const brand = body.brand || "Brand";
-    const product = body.product || "Product";
-    const audience = body.audience || "Audience";
-    const theme = body.theme || "luxury";
-
+    const { brand = "Brand", product = "Product", audience = "Audience", theme = "luxury" } = req.body || {};
     const themeLabel = getThemeLabel(theme);
+    const client = getGroqClient();
 
-    try {
-      const client = getGroqClient();
-      const data = await callGroqJSON<any>(
-        client, 
-        "You are an influencer marketing specialist. Return ONLY valid JSON.",
-        `Match the best influencer(s) from this curated list for the campaign: ${JSON.stringify(CURATED_INFLUENCERS)}. Campaign Context - Brand: ${brand}, Product: ${product}, Audience: ${audience}, Theme: ${themeLabel}. Provide: selectedInfluencerName, brandCollabAngle, collaborationIdeas, campaignIdea, keyMessage, coreStrategy, socialContent, videoStoryboard, adScript, and brandPositioning.`,
-        "influencer",
-        { brand, product, audience }
-      );
-      return res.status(200).json(unifyResponse(data, brand, product, audience, theme));
-    } catch (err: any) {
-      console.error("Groq Influencer Error in generate-influencer.ts:", err?.message || err);
-      return res.status(200).json(getFallbackResponse("influencer", { brand, product, audience }));
+    const data = await callGroqJSON<any>(
+      client,
+      "You are an influencer marketing specialist. Return ONLY valid JSON.",
+      `Match the best influencer(s) from this list: ${JSON.stringify(CURATED_INFLUENCERS)}. Brand: ${brand}, Product: ${product}, Audience: ${audience}, Theme: ${themeLabel}. Return fields: selectedInfluencerName, brandCollabAngle, collaborationIdeas, campaignIdea, keyMessage, coreStrategy, socialContent, videoStoryboard, adScript, brandPositioning.`
+    );
+
+    if (!data) {
+      return res.status(200).json({
+        error: true,
+        message: "Influencer matching failed.",
+        data: null
+      });
     }
-  } catch (globalErr: any) {
-    console.error("Fatal API Error in generate-influencer.ts:", globalErr);
-    return res.status(500).json({ error: true, message: "Internal server error", code: "INTERNAL_SERVER_ERROR" });
+
+    return res.status(200).json({
+      error: false,
+      message: "Success",
+      data: unifyResponse(data, brand, product, audience, theme)
+    });
+
+  } catch (err: any) {
+    console.error("Fatal API Error:", err);
+    return res.status(500).json({
+      error: true,
+      message: "Internal server error",
+      data: null
+    });
   }
 }

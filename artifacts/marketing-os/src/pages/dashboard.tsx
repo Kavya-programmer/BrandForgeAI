@@ -1,6 +1,10 @@
 import { useState, useCallback } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "@/components/ui/toaster";
+import { Sidebar } from "@/components/dashboard/sidebar";
+import { MainContent } from "@/components/dashboard/main-content";
+import { LoadingOverlay } from "@/components/dashboard/loading-overlay";
 import {
   useGenerateCampaign,
   useGenerateStrategy,
@@ -9,42 +13,62 @@ import {
   useGenerateInfluencer,
   useTrendStealer,
 } from "@workspace/api-client-react";
-import type {
-  CampaignResult,
-  StrategyResult,
-  VideoPlanResult,
-  BrandResult,
-  InfluencerResult,
-  TrendStealerResult,
-  GenerateCampaignBody,
-} from "@workspace/api-client-react";
-import { Sidebar } from "@/components/dashboard/sidebar";
-import { MainContent } from "@/components/dashboard/main-content";
-import { LoadingOverlay } from "@/components/dashboard/loading-overlay";
-import { Toaster } from "@/components/ui/toaster";
 
-export type FormData = {
+export type ActionType = "campaign" | "strategy" | "video" | "brand" | "influencer" | "trends";
+
+export interface FormData {
   brand: string;
   product: string;
   audience: string;
   theme: string;
+}
+
+export interface GenerateCampaignBody {
+  brand: string;
+  product: string;
+  audience: string;
+  theme: string;
+}
+
+export type CampaignResponse = {
+  campaignIdea: string;
+  keyMessage: string;
+  coreStrategy: string;
+  socialContent: string;
+  videoStoryboard: string;
+  adScript: string;
+  brandPositioning: string;
+  influencerAngles: string;
+  viralityScore: number;
+  estimatedViews: string;
+  // Specialized fields
+  positioning?: string;
+  audiencePsychology?: string;
+  viralHooks?: string[];
+  sloganIdeas?: string[];
+  competitorAngle?: string;
+  platformStrategy?: string;
+  scenes?: Array<{ sceneNumber: number; visual: string; audio: string }>;
+  brandArchetype?: string;
+  brandVoice?: string;
+  colorPalette?: string[];
+  selectedInfluencerName?: string;
+  brandCollabAngle?: string;
 };
 
-export type ActionType =
-  | "campaign"
-  | "strategy"
-  | "video"
-  | "brand"
-  | "influencer"
-  | "trends";
+export type ApiResponse<T> = {
+  error: boolean;
+  message: string;
+  data: T | null;
+};
 
 export type ModuleResults = {
-  campaign?: CampaignResult;
-  strategy?: StrategyResult;
-  video?: VideoPlanResult;
-  brand?: BrandResult;
-  influencer?: InfluencerResult;
-  trends?: TrendStealerResult;
+  campaign?: CampaignResponse;
+  strategy?: CampaignResponse;
+  video?: CampaignResponse;
+  brand?: CampaignResponse;
+  influencer?: CampaignResponse;
+  trends?: CampaignResponse;
 };
 
 export default function Dashboard() {
@@ -109,38 +133,42 @@ export default function Dashboard() {
       setLoadingMessage(LOADING_MESSAGES[type]);
 
       try {
+        let result: ApiResponse<CampaignResponse>;
+        
         switch (type) {
           case "campaign": {
-            const data = await campaignMutation.mutateAsync({ data: payload });
-            setResults((prev) => ({ ...prev, campaign: data }));
+            result = await campaignMutation.mutateAsync({ data: payload }) as any;
             break;
           }
           case "strategy": {
-            const data = await strategyMutation.mutateAsync({ data: payload });
-            setResults((prev) => ({ ...prev, strategy: data }));
+            result = await strategyMutation.mutateAsync({ data: payload }) as any;
             break;
           }
           case "video": {
-            const data = await videoPlanMutation.mutateAsync({ data: payload });
-            setResults((prev) => ({ ...prev, video: data }));
+            result = await videoPlanMutation.mutateAsync({ data: payload }) as any;
             break;
           }
           case "brand": {
-            const data = await brandMutation.mutateAsync({ data: payload });
-            setResults((prev) => ({ ...prev, brand: data }));
+            result = await brandMutation.mutateAsync({ data: payload }) as any;
             break;
           }
           case "influencer": {
-            const data = await influencerMutation.mutateAsync({ data: payload });
-            setResults((prev) => ({ ...prev, influencer: data }));
+            result = await influencerMutation.mutateAsync({ data: payload }) as any;
             break;
           }
           case "trends": {
-            const data = await trendsMutation.mutateAsync({ data: payload });
-            setResults((prev) => ({ ...prev, trends: data }));
+            result = await trendsMutation.mutateAsync({ data: payload }) as any;
             break;
           }
+          default:
+            throw new Error(`Unknown type: ${type}`);
         }
+
+        if (result.error || !result.data) {
+          throw new Error(result.message || "Generation failed");
+        }
+
+        setResults((prev) => ({ ...prev, [type]: result.data }));
         setActiveTab(type);
         toast({
           title: "Generated!",

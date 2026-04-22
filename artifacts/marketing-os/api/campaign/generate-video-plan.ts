@@ -1,36 +1,51 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getGroqClient, callGroqJSON, getThemeLabel, getFallbackResponse, unifyResponse } from "../../src/lib/campaign-logic.js";
+import {
+  getGroqClient,
+  callGroqJSON,
+  getThemeLabel,
+  unifyResponse
+} from "../../src/lib/campaign-logic.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     if (req.method !== "POST") {
-      return res.status(405).json({ error: true, message: "Method not allowed", code: "METHOD_NOT_ALLOWED" });
+      return res.status(405).json({
+        error: true,
+        message: "Method not allowed",
+        data: null
+      });
     }
 
-    const body = req.body || {};
-    const brand = body.brand || "Brand";
-    const product = body.product || "Product";
-    const audience = body.audience || "Audience";
-    const theme = body.theme || "luxury";
-
+    const { brand = "Brand", product = "Product", audience = "Audience", theme = "luxury" } = req.body || {};
     const themeLabel = getThemeLabel(theme);
+    const client = getGroqClient();
 
-    try {
-      const client = getGroqClient();
-      const data = await callGroqJSON<any>(
-        client, 
-        "You are an expert video director and social media content creator. Return ONLY valid JSON.",
-        `Create a detailed video production plan and full campaign context for Brand: ${brand}, Product: ${product}, Audience: ${audience}, Theme: ${themeLabel}. Provide: script, scenes, campaignIdea, keyMessage, coreStrategy, socialContent, videoStoryboard, adScript, and brandPositioning.`,
-        "video-plan",
-        { brand, product, audience }
-      );
-      return res.status(200).json(unifyResponse(data, brand, product, audience, theme));
-    } catch (err: any) {
-      console.error("Groq Video Plan Error in generate-video-plan.ts:", err?.message || err);
-      return res.status(200).json(getFallbackResponse("video-plan", { brand, product, audience }));
+    const data = await callGroqJSON<any>(
+      client,
+      "You are an expert video director. Return ONLY valid JSON.",
+      `Create a detailed video production plan. Brand: ${brand}, Product: ${product}, Audience: ${audience}, Theme: ${themeLabel}. Return fields: campaignIdea, keyMessage, coreStrategy, socialContent, videoStoryboard, adScript, brandPositioning, influencerAngles.`
+    );
+
+    if (!data) {
+      return res.status(200).json({
+        error: true,
+        message: "Video plan generation failed.",
+        data: null
+      });
     }
-  } catch (globalErr: any) {
-    console.error("Fatal API Error in generate-video-plan.ts:", globalErr);
-    return res.status(500).json({ error: true, message: "Internal server error", code: "INTERNAL_SERVER_ERROR" });
+
+    return res.status(200).json({
+      error: false,
+      message: "Success",
+      data: unifyResponse(data, brand, product, audience, theme)
+    });
+
+  } catch (err: any) {
+    console.error("Fatal API Error:", err);
+    return res.status(500).json({
+      error: true,
+      message: "Internal server error",
+      data: null
+    });
   }
 }

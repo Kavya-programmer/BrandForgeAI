@@ -28,6 +28,10 @@ const PLATFORM_BADGES: Record<string, string> = {
 };
 
 export function TrendsPanel({ data }: TrendsPanelProps) {
+  const currentTrends = Array.isArray(data.currentTrends) ? data.currentTrends : [];
+  const trendHooks = Array.isArray(data.trendHooks) ? data.trendHooks : [];
+  const adaptedCampaign = data.adaptedCampaign || data.campaignIdea || "Trend adaptation pending.";
+
   return (
     <motion.div variants={STAGGER.container} initial="hidden" animate="show" className="space-y-4">
 
@@ -38,10 +42,10 @@ export function TrendsPanel({ data }: TrendsPanelProps) {
           <span className="section-label">Trending Right Now</span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4">
-          {data.currentTrends.map((trend, i) => {
-            const viralKey = trend.virality?.toLowerCase() as string;
+          {currentTrends.length > 0 ? currentTrends.map((trend, i) => {
+            const viralKey = (trend.virality || "").toLowerCase();
             const gradient = VIRALITY_COLORS[viralKey] ?? "from-violet-500 to-purple-600";
-            const platformKey = trend.platform?.toLowerCase();
+            const platformKey = (trend.platform || "").toLowerCase();
             const badgeClass = PLATFORM_BADGES[platformKey] ?? "bg-secondary border-border text-muted-foreground";
 
             return (
@@ -56,19 +60,21 @@ export function TrendsPanel({ data }: TrendsPanelProps) {
                 <div className={`px-4 py-2.5 bg-gradient-to-r ${gradient} flex items-center justify-between`}>
                   <div className="flex items-center gap-2">
                     <TrendingUp className="w-3.5 h-3.5 text-white" />
-                    <span className="text-sm font-bold text-white">{trend.trend}</span>
+                    <span className="text-sm font-bold text-white">{trend.trend || "Trending Topic"}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={`chip border text-[10px] ${badgeClass}`}>{trend.platform}</span>
-                    <span className="text-[10px] font-bold text-white/80 uppercase">{trend.virality}</span>
+                    <span className={`chip border text-[10px] ${badgeClass}`}>{trend.platform || "Social"}</span>
+                    <span className="text-[10px] font-bold text-white/80 uppercase">{trend.virality || "High"}</span>
                   </div>
                 </div>
                 <div className="px-4 py-3">
-                  <p className="text-xs text-foreground/80 leading-relaxed">{trend.howToUse}</p>
+                  <p className="text-xs text-foreground/80 leading-relaxed">{trend.howToUse || "Integration strategy pending."}</p>
                 </div>
               </motion.div>
             );
-          })}
+          }) : (
+            <p className="text-sm text-muted-foreground italic col-span-2 px-2">No active trends detected.</p>
+          )}
         </div>
       </motion.div>
 
@@ -81,9 +87,9 @@ export function TrendsPanel({ data }: TrendsPanelProps) {
             <Zap className="w-4 h-4 text-primary" />
             <span className="section-label text-primary/70">Adapted Campaign Concept</span>
           </div>
-          <CopyButton text={data.adaptedCampaign} />
+          <CopyButton text={adaptedCampaign} />
         </div>
-        <p className="text-sm text-foreground/90 leading-relaxed">{data.adaptedCampaign}</p>
+        <p className="text-sm text-foreground/90 leading-relaxed">{adaptedCampaign}</p>
       </motion.div>
 
       {/* 2-col: Hooks + Viral Formula */}
@@ -95,10 +101,10 @@ export function TrendsPanel({ data }: TrendsPanelProps) {
               <Zap className="w-4 h-4 text-amber-400" />
               <span className="section-label">Trend Hooks</span>
             </div>
-            <CopyButton text={data.trendHooks.join("\n")} />
+            <CopyButton text={trendHooks.join("\n")} />
           </div>
           <div className="px-5 py-4 space-y-2">
-            {data.trendHooks.map((hook, i) => (
+            {trendHooks.length > 0 ? trendHooks.map((hook, i) => (
               <div key={i} className="flex items-start gap-2.5 group">
                 <span className="w-5 h-5 rounded-md bg-amber-400/15 text-amber-400 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
                   {i + 1}
@@ -108,62 +114,58 @@ export function TrendsPanel({ data }: TrendsPanelProps) {
                   <CopyButton text={hook} className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                 </div>
               </div>
-            ))}
+            )) : (
+              <p className="text-sm text-muted-foreground italic">Trend-jacking hooks pending.</p>
+            )}
           </div>
         </motion.div>
 
         {/* Viral Formula + Timing */}
         <div className="space-y-3">
-          {data.viralFormula && (
-            <motion.div variants={STAGGER.item} className="glass rounded-2xl border border-border/60 p-5">
-              <div className="flex items-center justify-between mb-3">
-                <span className="section-label">Viral Formula</span>
-                <CopyButton text={data.viralFormula} />
-              </div>
-              <p className="text-sm text-foreground/85 leading-relaxed">{data.viralFormula}</p>
-            </motion.div>
-          )}
-          {data.timingAdvice && (
-            <motion.div variants={STAGGER.item} className="glass rounded-2xl border border-border/60 p-5">
-              <div className="flex items-center justify-between mb-3">
-                <span className="section-label">Timing Strategy</span>
-                <CopyButton text={data.timingAdvice} />
-              </div>
-              <p className="text-sm text-foreground/85 leading-relaxed">{data.timingAdvice}</p>
-            </motion.div>
-          )}
+          <motion.div variants={STAGGER.item} className="glass rounded-2xl border border-border/60 p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="section-label">Viral Formula</span>
+              <CopyButton text={data.viralFormula || data.coreStrategy || ""} />
+            </div>
+            <p className="text-sm text-foreground/85 leading-relaxed">{data.viralFormula || data.coreStrategy || "Viral formula not available."}</p>
+          </motion.div>
+          <motion.div variants={STAGGER.item} className="glass rounded-2xl border border-border/60 p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="section-label">Timing Strategy</span>
+              <CopyButton text={data.timingAdvice || ""} />
+            </div>
+            <p className="text-sm text-foreground/85 leading-relaxed">{data.timingAdvice || "Optimal timing data pending."}</p>
+          </motion.div>
         </div>
       </div>
 
       {/* Hashtag Strategy */}
-      {data.hashtagStrategy && (
-        <motion.div variants={STAGGER.item} className="glass rounded-2xl border border-border/60 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Hash className="w-4 h-4 text-cyan-400" />
-              <span className="section-label">Hashtag Strategy</span>
-            </div>
-            <CopyButton text={data.hashtagStrategy} />
+      <motion.div variants={STAGGER.item} className="glass rounded-2xl border border-border/60 p-5">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Hash className="w-4 h-4 text-cyan-400" />
+            <span className="section-label">Hashtag Strategy</span>
           </div>
-          <p className="text-sm text-foreground/85 leading-relaxed mb-4">{data.hashtagStrategy}</p>
-          {/* Hashtag chips */}
-          {data.hashtags && data.hashtags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {data.hashtags.map((tag, i) => (
-                <button
-                  key={i}
-                  onClick={() => navigator.clipboard.writeText(tag).catch(() => {})}
-                  className="chip chip-primary hover:bg-primary/20 cursor-pointer"
-                  title="Click to copy"
-                >
-                  {tag}
-                </button>
-              ))}
-              <CopyButton text={data.hashtags.join(" ")} />
-            </div>
-          )}
-        </motion.div>
-      )}
+          <CopyButton text={data.hashtagStrategy || ""} />
+        </div>
+        <p className="text-sm text-foreground/85 leading-relaxed mb-4">{data.hashtagStrategy || "Hashtag strategy pending."}</p>
+        {/* Hashtag chips */}
+        {data.hashtags && data.hashtags.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {data.hashtags.map((tag, i) => (
+              <button
+                key={i}
+                onClick={() => navigator.clipboard.writeText(tag).catch(() => {})}
+                className="chip chip-primary hover:bg-primary/20 cursor-pointer"
+                title="Click to copy"
+              >
+                {tag}
+              </button>
+            ))}
+            <CopyButton text={data.hashtags.join(" ")} />
+          </div>
+        )}
+      </motion.div>
 
       {/* Sound Suggestions */}
       {data.soundSuggestions && data.soundSuggestions.length > 0 && (
@@ -201,6 +203,15 @@ export function TrendsPanel({ data }: TrendsPanelProps) {
           </div>
         </motion.div>
       )}
+
+      {/* Virality Score */}
+      <motion.div variants={STAGGER.item}>
+        <ViralityGauge
+          score={data.viralityScore}
+          estimatedViews={data.estimatedViews}
+          explanation={data.viralityExplanation || "Virality breakdown pending."}
+        />
+      </motion.div>
     </motion.div>
   );
 }

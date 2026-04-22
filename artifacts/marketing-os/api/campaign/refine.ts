@@ -1,30 +1,34 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getGroqClient, getFallbackResponse, unifyResponse } from "../../src/lib/campaign-logic.js";
+import { getGroqClient, unifyResponse } from "../../src/lib/campaign-logic.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     if (req.method !== "POST") {
-      return res.status(405).json({ error: true, message: "Method not allowed", code: "METHOD_NOT_ALLOWED" });
+      return res.status(405).json({
+        error: true,
+        message: "Method not allowed",
+        data: null
+      });
     }
 
-    const body = req.body || {};
-    const previousResponse = body.previousResponse || {};
-    const refinement = body.refinement || "";
-    const brand = body.brand || "Brand";
-    const product = body.product || "Product";
-    const audience = body.audience || "Audience";
-    const theme = body.theme || "luxury";
+    const { previousResponse = {}, refinement = "", brand = "Brand", product = "Product", audience = "Audience", theme = "luxury" } = req.body || {};
 
+    const client = getGroqClient();
+    if (!client) {
+      return res.status(200).json({
+        error: true,
+        message: "GROQ_API_KEY missing",
+        data: null
+      });
+    }
+    
     try {
-      const client = getGroqClient();
-      if (!client) throw new Error("GROQ_API_KEY_MISSING");
-      
       const completion = await client.chat.completions.create({
         model: "llama-3.3-70b-versatile",
         messages: [
-          { role: "system", content: "You are an expert copy editor. Refine the provided marketing content according to the instructions. You MUST return valid JSON matching the full campaign schema." },
+          { role: "system", content: "You are an expert copy editor. Refine the provided content. Return ONLY valid JSON matching the full campaign schema." },
           { role: "assistant", content: typeof previousResponse === 'string' ? previousResponse : JSON.stringify(previousResponse) },
-          { role: "user", content: `Refine this content: ${refinement}. Ensure you return a full JSON object with: campaignIdea, keyMessage, coreStrategy, socialContent, videoStoryboard, adScript, and brandPositioning.` }
+          { role: "user", content: `Refine this content: ${refinement}. Return JSON with: campaignIdea, keyMessage, coreStrategy, socialContent, videoStoryboard, adScript, brandPositioning, influencerAngles.` }
         ],
         response_format: { type: "json_object" },
         temperature: 0.7,
@@ -34,13 +38,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const raw = completion.choices[0]?.message?.content ?? "{}";
       const data = JSON.parse(raw);
 
-      return res.status(200).json(unifyResponse(data, brand, product, audience, theme));
+      return res.status(200).json({
+        error: false,
+        message: "Success",
+        data: unifyResponse(data, brand, product, audience, theme)
+      });
     } catch (err: any) {
-      console.error("Groq Refine Error in refine.ts:", err?.message || err);
-      return res.status(200).json(getFallbackResponse("refine", { brand, product, audience }));
+      console.error("Refine Error:", err);
+      return res.status(200).json({
+        error: true,
+        message: "Refinement failed.",
+        data: null
+      });
     }
-  } catch (globalErr: any) {
-    console.error("Fatal API Error in refine.ts:", globalErr);
-    return res.status(500).json({ error: true, message: "Internal server error", code: "INTERNAL_SERVER_ERROR" });
+  } catch (err: any) {
+    console.error("Fatal API Error:", err);
+    return res.status(500).json({
+      error: true,
+      message: "Internal server error",
+      data: null
+    });
   }
 }

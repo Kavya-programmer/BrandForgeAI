@@ -3,7 +3,7 @@ import {
   getGroqClient,
   callGroqJSON,
   getThemeLabel,
-  getFallbackResponse,
+  CURATED_INFLUENCERS,
   unifyResponse
 } from "../../src/lib/campaign-logic.js";
 
@@ -13,40 +13,40 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(405).json({
         error: true,
         message: "Method not allowed",
-        code: "METHOD_NOT_ALLOWED"
+        data: null
       });
     }
 
-    const body = req.body || {};
-    const brand = body.brand || "Brand";
-    const product = body.product || "Product";
-    const audience = body.audience || "Audience";
-    const theme = body.theme || "luxury";
-
+    const { brand = "Brand", product = "Product", audience = "Audience", theme = "luxury" } = req.body || {};
     const themeLabel = getThemeLabel(theme);
     const client = getGroqClient();
 
-    try {
-      const data = await callGroqJSON<any>(
-        client,
-        "You are a world-class brand strategist. Return ONLY valid JSON.",
-        `Create a comprehensive brand strategy and full campaign context for Brand: ${brand}, Product: ${product}, Audience: ${audience}, Theme: ${themeLabel}. Provide: positioning, keyMessage, viralHooks, sloganIdeas, platformStrategy, campaignIdea, coreStrategy, socialContent, videoStoryboard, adScript, and brandPositioning.`,
-        "strategy",
-        { brand, product, audience }
-      );
+    const data = await callGroqJSON<any>(
+      client,
+      "You are a world-class brand strategist. Return ONLY valid JSON.",
+      `Create a comprehensive brand strategy. Brand: ${brand}, Product: ${product}, Audience: ${audience}, Theme: ${themeLabel}. Return fields: campaignIdea, keyMessage, coreStrategy, socialContent, videoStoryboard, adScript, brandPositioning, influencerAngles.`
+    );
 
-      return res.status(200).json(unifyResponse(data, brand, product, audience, theme));
-    } catch (err: any) {
-      console.error("Groq Strategy Error in generate-strategy.ts:", err?.message || err);
-      return res.status(200).json(getFallbackResponse("strategy", { brand, product, audience }));
+    if (!data) {
+      return res.status(200).json({
+        error: true,
+        message: "Strategy generation failed.",
+        data: null
+      });
     }
-  } catch (globalErr: any) {
-    console.error("Fatal API Error in generate-strategy.ts:", globalErr);
 
+    return res.status(200).json({
+      error: false,
+      message: "Success",
+      data: unifyResponse(data, brand, product, audience, theme)
+    });
+
+  } catch (err: any) {
+    console.error("Fatal API Error:", err);
     return res.status(500).json({
       error: true,
       message: "Internal server error",
-      code: "INTERNAL_SERVER_ERROR"
+      data: null
     });
   }
 }

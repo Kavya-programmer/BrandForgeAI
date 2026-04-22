@@ -28,6 +28,8 @@ const PLATFORMS = [
 
 export function StrategyPanel({ data }: StrategyPanelProps) {
   const [activeHook, setActiveHook] = useState(0);
+  const viralHooks = Array.isArray(data.viralHooks) ? data.viralHooks : [];
+  const sloganIdeas = Array.isArray(data.sloganIdeas) ? data.sloganIdeas : [];
 
   return (
     <motion.div variants={STAGGER.container} initial="hidden" animate="show" className="space-y-4">
@@ -43,13 +45,13 @@ export function StrategyPanel({ data }: StrategyPanelProps) {
           <span className="section-label">Market Positioning</span>
         </div>
         <div className="flex justify-between items-start gap-3">
-          <p className="text-sm text-foreground/90 leading-relaxed flex-1">{data.positioning}</p>
-          <CopyButton text={data.positioning} className="shrink-0 mt-0.5" />
+          <p className="text-sm text-foreground/90 leading-relaxed flex-1">{data.positioning || data.brandPositioning || "Positioning strategy not available."}</p>
+          <CopyButton text={data.positioning || data.brandPositioning || ""} className="shrink-0 mt-0.5" />
         </div>
       </motion.div>
 
       {/* Key Message */}
-      {data.keyMessage && (
+      {(data.keyMessage) && (
         <motion.div variants={STAGGER.item}
           className="rounded-2xl border border-primary/25 px-6 py-5 glow-primary-sm"
           style={{ background: "linear-gradient(135deg, hsl(252,100%,72%,0.08), hsl(290,100%,70%,0.05))" }}>
@@ -68,46 +70,48 @@ export function StrategyPanel({ data }: StrategyPanelProps) {
             <Brain className="w-4 h-4 text-violet-400" />
             <span className="section-label">Audience Psychology</span>
           </div>
-          <CopyButton text={data.audiencePsychology} />
+          <CopyButton text={data.audiencePsychology || data.coreStrategy || ""} />
         </div>
-        <p className="text-sm text-foreground/85 leading-relaxed">{data.audiencePsychology}</p>
+        <p className="text-sm text-foreground/85 leading-relaxed">{data.audiencePsychology || data.coreStrategy || "Audience insights not available."}</p>
       </motion.div>
 
       {/* Viral Hooks — interactive flashcards */}
-      <motion.div variants={STAGGER.item} className="glass rounded-2xl border border-border/60 overflow-hidden">
-        <div className="flex items-center gap-2.5 px-5 pt-4 pb-3 border-b border-border/40">
-          <Zap className="w-4 h-4 text-amber-400" />
-          <span className="section-label">Viral Hooks</span>
-          <span className="ml-auto text-[10px] text-muted-foreground">{activeHook + 1} / {data.viralHooks.length}</span>
-        </div>
-        {/* Hook display */}
-        <div className="px-5 py-5 min-h-[90px] flex items-center">
-          <motion.p
-            key={activeHook}
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="text-base font-medium text-foreground leading-snug"
-          >
-            &ldquo;{data.viralHooks[activeHook]}&rdquo;
-          </motion.p>
-        </div>
-        {/* Hook selector pills */}
-        <div className="flex flex-wrap gap-2 px-5 pb-4">
-          {data.viralHooks.map((hook, i) => (
-            <button
-              key={i}
-              onClick={() => setActiveHook(i)}
-              className={cn(
-                "chip transition-all",
-                i === activeHook ? "chip-primary border-primary/40" : "hover:border-border"
-              )}
+      {viralHooks.length > 0 && (
+        <motion.div variants={STAGGER.item} className="glass rounded-2xl border border-border/60 overflow-hidden">
+          <div className="flex items-center gap-2.5 px-5 pt-4 pb-3 border-b border-border/40">
+            <Zap className="w-4 h-4 text-amber-400" />
+            <span className="section-label">Viral Hooks</span>
+            <span className="ml-auto text-[10px] text-muted-foreground">{activeHook + 1} / {viralHooks.length}</span>
+          </div>
+          {/* Hook display */}
+          <div className="px-5 py-5 min-h-[90px] flex items-center">
+            <motion.p
+              key={activeHook}
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="text-base font-medium text-foreground leading-snug"
             >
-              Hook {i + 1}
-            </button>
-          ))}
-          <CopyButton text={data.viralHooks.join("\n")} className="ml-auto" />
-        </div>
-      </motion.div>
+              &ldquo;{viralHooks[activeHook]}&rdquo;
+            </motion.p>
+          </div>
+          {/* Hook selector pills */}
+          <div className="flex flex-wrap gap-2 px-5 pb-4">
+            {viralHooks.map((hook, i) => (
+              <button
+                key={i}
+                onClick={() => setActiveHook(i)}
+                className={cn(
+                  "chip transition-all",
+                  i === activeHook ? "chip-primary border-primary/40" : "hover:border-border"
+                )}
+              >
+                Hook {i + 1}
+              </button>
+            ))}
+            <CopyButton text={viralHooks.join("\n")} className="ml-auto" />
+          </div>
+        </motion.div>
+      )}
 
       {/* 2-col: Slogans + Competitor Angle */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -118,16 +122,18 @@ export function StrategyPanel({ data }: StrategyPanelProps) {
               <MessageSquare className="w-4 h-4 text-pink-400" />
               <span className="section-label">Slogan Ideas</span>
             </div>
-            <CopyButton text={data.sloganIdeas.join("\n")} />
+            <CopyButton text={sloganIdeas.join("\n")} />
           </div>
           <div className="px-5 py-4 space-y-2">
-            {data.sloganIdeas.map((slogan, i) => (
+            {sloganIdeas.length > 0 ? sloganIdeas.map((slogan, i) => (
               <div key={i} className="flex items-center gap-3 group">
                 <span className="text-[11px] text-primary/60 font-mono w-4 shrink-0">0{i + 1}</span>
                 <p className="text-sm text-foreground/90 font-medium flex-1">&ldquo;{slogan}&rdquo;</p>
                 <CopyButton text={slogan} className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
               </div>
-            ))}
+            )) : (
+              <p className="text-sm text-muted-foreground italic">No slogans available.</p>
+            )}
           </div>
         </motion.div>
 
@@ -138,10 +144,10 @@ export function StrategyPanel({ data }: StrategyPanelProps) {
               <Target className="w-4 h-4 text-emerald-400" />
               <span className="section-label">Competitor Angle</span>
             </div>
-            <CopyButton text={data.competitorAngle} />
+            <CopyButton text={data.competitorAngle || ""} />
           </div>
           <div className="px-5 py-4">
-            <p className="text-sm text-foreground/85 leading-relaxed">{data.competitorAngle}</p>
+            <p className="text-sm text-foreground/85 leading-relaxed">{data.competitorAngle || "Market competition analysis pending."}</p>
           </div>
         </motion.div>
       </div>
@@ -150,7 +156,7 @@ export function StrategyPanel({ data }: StrategyPanelProps) {
       <motion.div variants={STAGGER.item} className="glass rounded-2xl border border-border/60 overflow-hidden">
         <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border/40">
           <span className="section-label">Platform Strategy</span>
-          <CopyButton text={data.platformStrategy} />
+          <CopyButton text={data.platformStrategy || data.coreStrategy || ""} />
         </div>
         {/* Platform icons row */}
         <div className="flex gap-2 px-5 pt-4">
@@ -163,7 +169,7 @@ export function StrategyPanel({ data }: StrategyPanelProps) {
           ))}
         </div>
         <div className="px-5 pb-5 pt-3">
-          <p className="text-sm text-foreground/85 leading-relaxed">{data.platformStrategy}</p>
+          <p className="text-sm text-foreground/85 leading-relaxed">{data.platformStrategy || data.coreStrategy || "Platform rollout plan pending."}</p>
         </div>
       </motion.div>
 
@@ -172,7 +178,7 @@ export function StrategyPanel({ data }: StrategyPanelProps) {
         <ViralityGauge
           score={data.viralityScore}
           estimatedViews={data.estimatedViews}
-          explanation={data.viralityExplanation}
+          explanation={data.viralityExplanation || "Virality breakdown pending."}
         />
       </motion.div>
     </motion.div>
