@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getGroqClient, callGroqJSON, getThemeLabel } from "../../src/lib/campaign-logic.js";
+import { getGroqClient, callGroqJSON, getThemeLabel, getFallbackResponse } from "../../src/lib/campaign-logic.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -17,11 +17,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     try {
       const client = getGroqClient();
-      const data = await callGroqJSON<any>(client, "Video director.", `Video plan for ${brand}, ${product}, ${audience}, ${themeLabel}`);
+      const data = await callGroqJSON<any>(
+        client, 
+        "You are an expert video director and social media content creator. Every field must contain detailed, realistic, and highly engaging video production plans. Do NOT return placeholders like 'Video script' or 'Scene 1'. Ensure the output is a valid JSON object.",
+        `Create a detailed video production plan for Brand: ${brand}, Product: ${product}, Audience: ${audience}, Theme: ${themeLabel}. Provide: script (full high-converting script), scenes (list with sceneNumber, duration, visual, cameraAngle, audio, and textOverlay), and versions (specific adaptations for tiktokViral, luxuryCinematic, and memeVersion).`,
+        "video-plan",
+        { brand, product, audience }
+      );
       return res.status(200).json(data);
     } catch (err: any) {
-      console.error("Groq Video Plan Error:", err?.message || err);
-      return res.status(200).json({ script: "Video script", scenes: [{ sceneNumber: 1, duration: "5s", visual: "Hero shot", cameraAngle: "Wide", audio: "Music", textOverlay: brand }], versions: { tiktokViral: "TikTok adapt", luxuryCinematic: "Luxury adapt", memeVersion: "Meme adapt" }, notice: "AI fallback" });
+      console.error("Groq Video Plan Error in generate-video-plan.ts:", err?.message || err);
+      return res.status(200).json(getFallbackResponse("video-plan", { brand, product, audience }));
     }
   } catch (globalErr: any) {
     console.error("Fatal API Error in generate-video-plan.ts:", globalErr);

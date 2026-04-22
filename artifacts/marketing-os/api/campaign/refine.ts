@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getGroqClient } from "../../src/lib/campaign-logic.js";
+import { getGroqClient, getFallbackResponse } from "../../src/lib/campaign-logic.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -13,18 +13,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     try {
       const client = getGroqClient();
-      if (!client) throw new Error("Missing Key");
+      if (!client) throw new Error("GROQ_API_KEY_MISSING");
       const completion = await client.chat.completions.create({
         model: "llama-3.3-70b-versatile",
-        messages: [{ role: "system", content: "Refine marketing content." }, { role: "assistant", content: previousResponse }, { role: "user", content: refinement }],
+        messages: [
+          { role: "system", content: "You are an expert copy editor and marketing strategist. Your task is to refine the provided content according to the user's instructions. Ensure the result is professional, high-quality, and realistic. Do NOT return placeholders or 'Not available'." },
+          { role: "assistant", content: typeof previousResponse === 'string' ? previousResponse : JSON.stringify(previousResponse) },
+          { role: "user", content: refinement }
+        ],
         temperature: 0.85,
         max_tokens: 3000,
       });
-      const refined = completion.choices[0]?.message?.content ?? previousResponse;
+      const refined = completion.choices[0]?.message?.content ?? "Refinement failed to generate content.";
       return res.status(200).json({ refinedContent: refined, refinement });
     } catch (err: any) {
-      console.error("Groq Refine Error:", err?.message || err);
-      return res.status(200).json({ refinedContent: previousResponse, refinement, notice: "Refinement fallback" });
+      console.error("Groq Refine Error in refine.ts:", err?.message || err);
+      return res.status(200).json(getFallbackResponse("refine"));
     }
   } catch (globalErr: any) {
     console.error("Fatal API Error in refine.ts:", globalErr);

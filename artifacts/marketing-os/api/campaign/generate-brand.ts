@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getGroqClient, callGroqJSON, getThemeLabel } from "../../src/lib/campaign-logic.js";
+import { getGroqClient, callGroqJSON, getThemeLabel, getFallbackResponse } from "../../src/lib/campaign-logic.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -17,11 +17,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     try {
       const client = getGroqClient();
-      const data = await callGroqJSON<any>(client, "Brand identity designer.", `Brand Identity for ${brand}, ${product}, ${audience}, ${themeLabel}`);
+      const data = await callGroqJSON<any>(
+        client, 
+        "You are an expert brand identity designer. Every field must contain detailed, realistic, and unique brand guidelines. Do NOT return placeholders like 'Tagline 1' or 'Not available'. Ensure the output is a valid JSON object.",
+        `Create a detailed brand identity for Brand: ${brand}, Product: ${product}, Audience: ${audience}, Theme: ${themeLabel}. Provide: tagline, brandArchetype, brandVoice, colorPalette (with hex codes and usage descriptions), and uniqueSellingPoints.`,
+        "brand",
+        { brand, product, audience }
+      );
       return res.status(200).json(data);
     } catch (err: any) {
-      console.error("Groq Brand Error:", err?.message || err);
-      return res.status(200).json({ tagline: "The Future", brandArchetype: "Creator", brandVoice: "Bold", colorPalette: [{ name: "Primary", hex: "#000000", usage: "Main" }], uniqueSellingPoints: ["Quality"], notice: "AI fallback" });
+      console.error("Groq Brand Error in generate-brand.ts:", err?.message || err);
+      return res.status(200).json(getFallbackResponse("brand", { brand, product, audience }));
     }
   } catch (globalErr: any) {
     console.error("Fatal API Error in generate-brand.ts:", globalErr);

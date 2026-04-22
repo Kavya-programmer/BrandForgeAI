@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getGroqClient, callGroqJSON, getThemeLabel } from "../../src/lib/campaign-logic.js";
+import { getGroqClient, callGroqJSON, getThemeLabel, getFallbackResponse } from "../../src/lib/campaign-logic.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -17,11 +17,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     try {
       const client = getGroqClient();
-      const data = await callGroqJSON<any>(client, "World class brand strategist.", `Strategy for ${brand}, ${product}, ${audience}, ${themeLabel}`);
+      const data = await callGroqJSON<any>(
+        client, 
+        "You are a world-class brand strategist. Every field must contain detailed, realistic, and highly competitive strategic insights. Do NOT return placeholders like 'Hook 1', 'Slogan 1', or 'Market leader'. Ensure the output is a valid JSON object.",
+        `Create a comprehensive brand strategy for Brand: ${brand}, Product: ${product}, Audience: ${audience}, Theme: ${themeLabel}. Provide: positioning (detailed statement), keyMessage, viralHooks (list of specific, actionable hooks), sloganIdeas (list of catchy slogans), platformStrategy (detailed breakdown by platform), and competitorAngle (specific differentiator).`,
+        "strategy",
+        { brand, product, audience }
+      );
       return res.status(200).json(data);
     } catch (err: any) {
-      console.error("Groq Strategy Error:", err?.message || err);
-      return res.status(200).json({ positioning: "Market leader", keyMessage: "Innovation", viralHooks: ["Hook 1"], sloganIdeas: ["Slogan 1"], platformStrategy: "Social first", competitorAngle: "Unique", notice: "AI fallback" });
+      console.error("Groq Strategy Error in generate-strategy.ts:", err?.message || err);
+      return res.status(200).json(getFallbackResponse("strategy", { brand, product, audience }));
     }
   } catch (globalErr: any) {
     console.error("Fatal API Error in generate-strategy.ts:", globalErr);

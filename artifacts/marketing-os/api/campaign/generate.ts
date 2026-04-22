@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getGroqClient, callGroqJSON, computeViralityScore, getEstimatedViews, getThemeLabel, normalizeBulletPoints } from "../../src/lib/campaign-logic.js";
+import { getGroqClient, callGroqJSON, computeViralityScore, getEstimatedViews, getThemeLabel, normalizeBulletPoints, getFallbackResponse } from "../../src/lib/campaign-logic.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -17,9 +17,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     
     try {
       const client = getGroqClient();
-      const data = await callGroqJSON<any>(client, 
-        "You are a structured marketing generation engine. Return valid JSON.",
-        `Create campaign for Brand: ${brand}, Product: ${product}, Audience: ${audience}, Theme: ${themeLabel}`
+      const data = await callGroqJSON<any>(
+        client, 
+        "You are a professional marketing strategist. Every field must contain detailed, realistic, and high-converting marketing content. Do NOT return placeholders like 'Hook 1', 'Slogan 1', or 'Not available'. Ensure the output is a valid JSON object.",
+        `Create a comprehensive marketing campaign for Brand: ${brand}, Product: ${product}, Audience: ${audience}, Theme: ${themeLabel}. Provide: campaignIdea, keyMessage, coreStrategy (list), socialContent, videoStoryboard, adScript, brandPositioning, and influencerAngles.`,
+        "generate",
+        { brand, product, audience }
       );
       const viralityScore = computeViralityScore(JSON.stringify(data), theme);
       return res.status(200).json({
@@ -29,21 +32,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         estimatedViews: getEstimatedViews(viralityScore)
       });
     } catch (err: any) {
-      // Fallback response if Groq fails or key is missing
-      console.error("Groq Generation Error:", err?.message || err);
-      return res.status(200).json({
-        campaignIdea: `The ${brand} Revolution for ${audience}`,
-        keyMessage: `${brand} changes everything.`,
-        coreStrategy: "• Disrupt the market\n• Engage audience\n• Drive results",
-        socialContent: "Coming soon!",
-        videoStoryboard: "Scene 1: Intro",
-        adScript: "Hello world",
-        brandPositioning: "Leader",
-        influencerAngles: "Lifestyle",
-        viralityScore: 85,
-        estimatedViews: "1M+ views",
-        notice: "AI generation failed, returning fallback data."
-      });
+      console.error("Groq Generation Error in generate.ts:", err?.message || err);
+      // Even if everything fails, we return a rich fallback from callGroqJSON or manual fallback
+      return res.status(200).json(getFallbackResponse("generate", { brand, product, audience }));
     }
   } catch (globalErr: any) {
     console.error("Fatal API Error in generate.ts:", globalErr);
