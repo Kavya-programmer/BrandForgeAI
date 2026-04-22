@@ -179,6 +179,9 @@ router.post("/campaign/generate", async (req, res) => {
       adScript: string;
       brandPositioning: string;
       influencerAngles: string;
+      viralityScore?: number;
+      viralityExplanation?: string;
+      estimatedViews?: string;
     }>(
       client,
       `You are a structured marketing generation engine.

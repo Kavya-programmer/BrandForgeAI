@@ -131,7 +131,7 @@ export function MainContent({
             <AnimatePresence mode="wait">
               {activeTab === "campaign" && results.campaign && (
                 <motion.div key="campaign" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <CampaignPanel data={results.campaign} />
+                  <CampaignPanel data={results.campaign as any} />
                 </motion.div>
               )}
               {activeTab === "strategy" && results.strategy && (
@@ -225,7 +225,7 @@ function EmptyState() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] as const }}
         className="w-full max-w-2xl text-center"
       >
         {/* Hero icon */}

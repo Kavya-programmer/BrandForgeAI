@@ -12,7 +12,7 @@ interface VideoPanelProps {
 
 const STAGGER = {
   container: { hidden: {}, show: { transition: { staggerChildren: 0.06 } } },
-  item: { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } } },
+  item: { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as const } } },
 };
 
 const AI_TOOLS = [
@@ -185,7 +185,7 @@ export function VideoPanel({ data, videoUrl }: VideoPanelProps) {
         </div>
         <div className="divide-y divide-border/40">
           {VERSION_LABELS.map(({ key, label, gradient }) => {
-            const v = data.versions as Record<string, string>;
+            const v = data.versions as unknown as Record<string, string>;
             const content = v[key];
             if (!content) return null;
             return (
