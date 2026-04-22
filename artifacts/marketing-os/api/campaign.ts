@@ -2,5 +2,10 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { THEMES } from "./_lib/campaign-logic";
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
-  return res.status(200).json({ themes: THEMES });
+  try {
+    return res.status(200).json({ themes: THEMES });
+  } catch (globalErr: any) {
+    console.error("Fatal API Error in campaign.ts:", globalErr);
+    return res.status(500).json({ error: true, message: "Internal server error", code: "INTERNAL_SERVER_ERROR" });
+  }
 }
