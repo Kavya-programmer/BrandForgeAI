@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getGroqClient, getFallbackResponse } from "../../src/lib/campaign-logic.js";
+import { getGroqClient, getFallbackResponse, unifyResponse } from "../../src/lib/campaign-logic.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -8,27 +8,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const body = req.body || {};
-    const previousResponse = body.previousResponse || "";
+    const previousResponse = body.previousResponse || {};
     const refinement = body.refinement || "";
+    const brand = body.brand || "Brand";
+    const product = body.product || "Product";
+    const audience = body.audience || "Audience";
+    const theme = body.theme || "luxury";
 
     try {
       const client = getGroqClient();
       if (!client) throw new Error("GROQ_API_KEY_MISSING");
+      
       const completion = await client.chat.completions.create({
         model: "llama-3.3-70b-versatile",
         messages: [
-          { role: "system", content: "You are an expert copy editor and marketing strategist. Your task is to refine the provided content according to the user's instructions. Ensure the result is professional, high-quality, and realistic. Do NOT return placeholders or 'Not available'." },
+          { role: "system", content: "You are an expert copy editor. Refine the provided marketing content according to the instructions. You MUST return valid JSON matching the full campaign schema." },
           { role: "assistant", content: typeof previousResponse === 'string' ? previousResponse : JSON.stringify(previousResponse) },
-          { role: "user", content: refinement }
+          { role: "user", content: `Refine this content: ${refinement}. Ensure you return a full JSON object with: campaignIdea, keyMessage, coreStrategy, socialContent, videoStoryboard, adScript, and brandPositioning.` }
         ],
-        temperature: 0.85,
+        response_format: { type: "json_object" },
+        temperature: 0.7,
         max_tokens: 3000,
       });
-      const refined = completion.choices[0]?.message?.content ?? "Refinement failed to generate content.";
-      return res.status(200).json({ refinedContent: refined, refinement });
+
+      const raw = completion.choices[0]?.message?.content ?? "{}";
+      const data = JSON.parse(raw);
+
+      return res.status(200).json(unifyResponse(data, brand, product, audience, theme));
     } catch (err: any) {
       console.error("Groq Refine Error in refine.ts:", err?.message || err);
-      return res.status(200).json(getFallbackResponse("refine"));
+      return res.status(200).json(getFallbackResponse("refine", { brand, product, audience }));
     }
   } catch (globalErr: any) {
     console.error("Fatal API Error in refine.ts:", globalErr);

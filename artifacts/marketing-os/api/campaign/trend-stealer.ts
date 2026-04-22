@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getGroqClient, callGroqJSON, getThemeLabel, getFallbackResponse } from "../../src/lib/campaign-logic.js";
+import { getGroqClient, callGroqJSON, getThemeLabel, getFallbackResponse, unifyResponse } from "../../src/lib/campaign-logic.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -19,12 +19,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const client = getGroqClient();
       const data = await callGroqJSON<any>(
         client, 
-        "You are a viral marketing expert and trend analyst. Every field must contain detailed, realistic, and highly actionable trend-jacking strategies. Do NOT return placeholders like 'Hook 1' or 'Adapt to product'. Ensure the output is a valid JSON object.",
-        `Create a trend-jacking (Trend Stealer) campaign for Brand: ${brand}, Product: ${product}, Audience: ${audience}, Theme: ${themeLabel}. Provide: currentTrends (list with trend name, platform, virality level, and specific howToUse instructions), adaptedCampaign (detailed concept), trendHooks (list of specific viral hooks), and viralFormula (specific engagement strategy).`,
+        "You are a viral marketing expert and trend analyst. Return ONLY valid JSON.",
+        `Create a trend-jacking campaign and full campaign context for Brand: ${brand}, Product: ${product}, Audience: ${audience}, Theme: ${themeLabel}. Provide: currentTrends, adaptedCampaign, trendHooks, viralFormula, campaignIdea, keyMessage, coreStrategy, socialContent, videoStoryboard, adScript, and brandPositioning.`,
         "trend-stealer",
         { brand, product, audience }
       );
-      return res.status(200).json(data);
+      return res.status(200).json(unifyResponse(data, brand, product, audience, theme));
     } catch (err: any) {
       console.error("Groq Trend Stealer Error in trend-stealer.ts:", err?.message || err);
       return res.status(200).json(getFallbackResponse("trend-stealer", { brand, product, audience }));
