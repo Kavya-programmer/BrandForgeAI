@@ -5,7 +5,7 @@
     "moduleResolution": "NodeNext",
     "lib": ["ES2022"],
     "outDir": "./dist",
-    "rootDir": ".",
+    "rootDir": "..",
     "strict": true,
     "noEmit": false,
     "noEmitOnError": true,
@@ -16,6 +16,6 @@
     "resolveJsonModule": true,
     "types": ["node"]
   },
-  "include": ["./**/*.ts"],
+  "include": ["./**/*.ts", "../src/lib/campaign-logic.ts"],
   "exclude": ["node_modules", "dist"]
 }

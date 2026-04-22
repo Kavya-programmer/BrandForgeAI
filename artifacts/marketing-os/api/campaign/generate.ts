@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getGroqClient, callGroqJSON, computeViralityScore, getEstimatedViews, getThemeLabel, normalizeBulletPoints } from "../_lib/campaign-logic.js";
+import { getGroqClient, callGroqJSON, computeViralityScore, getEstimatedViews, getThemeLabel, normalizeBulletPoints } from "../../src/lib/campaign-logic.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {

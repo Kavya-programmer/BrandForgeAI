@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { THEMES } from "./_lib/campaign-logic.js";
+import { THEMES } from "../src/lib/campaign-logic.js";
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
   try {
