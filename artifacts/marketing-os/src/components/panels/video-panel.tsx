@@ -123,9 +123,9 @@ export function VideoPanel({ data, videoUrl }: VideoPanelProps) {
       {/* Production details row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {[
-          { icon: Music, label: "Music Direction", content: data?.musicStyle, color: "text-pink-400" },
-          { icon: Scissors, label: "Editing Style", content: data?.editingStyle, color: "text-cyan-400" },
-          { icon: Type, label: "Captions", content: data?.captionsText, color: "text-amber-400" },
+          { icon: Music, label: "Music Direction", content: getString(data?.musicStyle), color: "text-pink-400" },
+          { icon: Scissors, label: "Editing Style", content: getString(data?.editingStyle), color: "text-cyan-400" },
+          { icon: Type, label: "Captions", content: getString(data?.captionsText), color: "text-amber-400" },
         ].map(({ icon: Icon, label, content, color }) => (
           <motion.div key={label} variants={STAGGER.item} className="glass rounded-2xl border border-border/60 p-4">
             <div className="flex items-center gap-2 mb-2">

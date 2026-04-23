@@ -22,6 +22,24 @@ const THEMES = [
   { id: "ai_influencer", label: "AI Influencer Mode", description: "Creates a complete fictional influencer persona to front your campaign" },
 ];
 
+// ─── Request Locking (Concurrency Control) ────────────────────────────────────
+const activeRequests = new Set<string>();
+
+function tryAcquireLock(key: string): boolean {
+  if (activeRequests.has(key)) {
+    console.warn(`[Backend] REQUEST BLOCKED: already in progress for key: ${key}`);
+    return false;
+  }
+  activeRequests.add(key);
+  console.log(`[Backend] REQUEST STARTED: ${key}`);
+  return true;
+}
+
+function releaseLock(key: string): void {
+  activeRequests.delete(key);
+  console.log(`[Backend] REQUEST COMPLETED: ${key}`);
+}
+
 // ─── In-memory response cache ─────────────────────────────────────────────────
 const responseCache = new Map<string, { data: unknown; timestamp: number }>();
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -182,12 +200,16 @@ router.post("/campaign/generate", async (req, res) => {
   if (!parsed.success) { res.status(400).json({ error: "Invalid request body" }); return; }
 
   const { brand, product, audience, theme } = parsed.data;
-  const themeLabel = getThemeLabel(theme);
   const cacheKey = getCacheKey("generate", { brand, product, audience, theme });
   const cached = getFromCache(cacheKey);
   if (cached) { res.json(cached); return; }
 
+  if (!tryAcquireLock(cacheKey)) {
+    return res.status(429).json({ error: true, message: "REQUEST BLOCKED: already in progress" });
+  }
+
   try {
+    const themeLabel = getThemeLabel(theme);
     const client = getGroqClient();
     const data = await callGroqJSON<{
       campaignIdea: string;
@@ -311,6 +333,8 @@ Respond with ONLY this JSON structure:
     
     setCache(cacheKey, fallbackResult);
     res.json(fallbackResult);
+  } finally {
+    releaseLock(cacheKey);
   }
 });
 
@@ -320,12 +344,16 @@ router.post("/campaign/generate-strategy", async (req, res) => {
   if (!parsed.success) { res.status(400).json({ error: "Invalid request" }); return; }
 
   const { brand, product, audience, theme } = parsed.data;
-  const themeLabel = getThemeLabel(theme);
   const cacheKey = getCacheKey("strategy", { brand, product, audience, theme });
   const cached = getFromCache(cacheKey);
   if (cached) { res.json(cached); return; }
 
+  if (!tryAcquireLock(cacheKey)) {
+    return res.status(429).json({ error: true, message: "REQUEST BLOCKED: already in progress" });
+  }
+
   try {
+    const themeLabel = getThemeLabel(theme);
     const client = getGroqClient();
     const data = await callGroqJSON<{
       positioning: string;
@@ -411,6 +439,8 @@ Respond with ONLY this JSON structure (all fields required, no null values):
     
     setCache(cacheKey, fallbackResult);
     res.json(fallbackResult);
+  } finally {
+    releaseLock(cacheKey);
   }
 });
 
@@ -420,12 +450,16 @@ router.post("/campaign/generate-video-plan", async (req, res) => {
   if (!parsed.success) { res.status(400).json({ error: "Invalid request" }); return; }
 
   const { brand, product, audience, theme } = parsed.data;
-  const themeLabel = getThemeLabel(theme);
   const cacheKey = getCacheKey("video-plan", { brand, product, audience, theme });
   const cached = getFromCache(cacheKey);
   if (cached) { res.json(cached); return; }
 
+  if (!tryAcquireLock(cacheKey)) {
+    return res.status(429).json({ error: true, message: "REQUEST BLOCKED: already in progress" });
+  }
+
   try {
+    const themeLabel = getThemeLabel(theme);
     const client = getGroqClient();
     const data = await callGroqJSON<{
       script: string;
@@ -548,6 +582,8 @@ Respond with ONLY this JSON structure (all fields required):
     
     setCache(cacheKey, fallbackResult);
     res.json(fallbackResult);
+  } finally {
+    releaseLock(cacheKey);
   }
 });
 
@@ -557,12 +593,16 @@ router.post("/campaign/generate-brand", async (req, res) => {
   if (!parsed.success) { res.status(400).json({ error: "Invalid request" }); return; }
 
   const { brand, product, audience, theme } = parsed.data;
-  const themeLabel = getThemeLabel(theme);
   const cacheKey = getCacheKey("brand", { brand, product, audience, theme });
   const cached = getFromCache(cacheKey);
   if (cached) { res.json(cached); return; }
 
+  if (!tryAcquireLock(cacheKey)) {
+    return res.status(429).json({ error: true, message: "REQUEST BLOCKED: already in progress" });
+  }
+
   try {
+    const themeLabel = getThemeLabel(theme);
     const client = getGroqClient();
     const data = await callGroqJSON<{
       tagline: string;
@@ -662,6 +702,8 @@ Respond with ONLY this JSON structure (all fields required, no null values):
     
     setCache(cacheKey, fallbackResult);
     res.json(fallbackResult);
+  } finally {
+    releaseLock(cacheKey);
   }
 });
 
@@ -739,12 +781,16 @@ router.post("/campaign/generate-influencer", async (req, res) => {
   if (!parsed.success) { res.status(400).json({ error: "Invalid request" }); return; }
 
   const { brand, product, audience, theme } = parsed.data;
-  const themeLabel = getThemeLabel(theme);
   const cacheKey = getCacheKey("influencer", { brand, product, audience, theme });
   const cached = getFromCache(cacheKey);
   if (cached) { res.json(cached); return; }
 
+  if (!tryAcquireLock(cacheKey)) {
+    return res.status(429).json({ error: true, message: "REQUEST BLOCKED: already in progress" });
+  }
+
   try {
+    const themeLabel = getThemeLabel(theme);
     const client = getGroqClient();
     const data = await callGroqJSON<{
       name: string;
@@ -854,6 +900,8 @@ Respond with ONLY this JSON structure (all fields required):
     
     setCache(cacheKey, fallbackResult);
     res.json(fallbackResult);
+  } finally {
+    releaseLock(cacheKey);
   }
 });
 
@@ -945,8 +993,6 @@ Respond with ONLY this JSON structure (all fields required):
       ],
       adaptedCampaign: `A multi-platform push using POV storytelling to show the dramatic difference ${brand} makes in the life of ${audience}.`,
       trendHooks: [
-        `POV: You upgraded your ${product}`,
-        `Nobody is talking about this ${product} hack...`,
         `The ${themeLabel} aesthetic you need right now`,
         `Why ${brand} is taking over my FYP`,
         `Stop scrolling if you are a ${audience}`
@@ -965,6 +1011,8 @@ Respond with ONLY this JSON structure (all fields required):
     
     setCache(cacheKey, fallbackResult);
     res.json(fallbackResult);
+  } finally {
+    releaseLock(cacheKey);
   }
 });
 
@@ -977,6 +1025,11 @@ router.post("/campaign/refine", async (req, res) => {
     return;
   }
   const themeLabel = theme ? getThemeLabel(theme) : "";
+  const cacheKey = getCacheKey("refine", { previousResponse, refinement, brand, theme });
+
+  if (!tryAcquireLock(cacheKey)) {
+    return res.status(429).json({ error: true, message: "REQUEST BLOCKED: already in progress" });
+  }
 
   try {
     const client = getGroqClient();
@@ -996,12 +1049,13 @@ Keep the same overall structure but make it better and more impactful. Output th
     res.json({ refinedContent: refined, refinement });
   } catch (err) {
     req.log.warn({ err }, "Refine failed or key missing — returning original content as fallback");
-    // Safe fallback: return the original content with a note rather than crashing
     res.json({
       refinedContent: previousResponse,
       refinement,
       notice: "Refinement service temporarily unavailable. Showing original content.",
     });
+  } finally {
+    releaseLock(cacheKey);
   }
 });
 

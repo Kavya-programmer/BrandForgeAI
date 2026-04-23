@@ -105,9 +105,32 @@ export default function Dashboard() {
     trends: "Stealing the hottest trends...",
   };
 
-  // ─── Generate handler ────────────────────────────────────────────────────
+  // ─── Request Locking & Debounce ──────────────────────────────────────────
+  const isRequestPending = (window as any)._aiRequestPending || false;
+  const lastClickTime = (window as any)._lastAiClick || 0;
+
   const handleGenerate = useCallback(
     async (type: ActionType) => {
+      const now = Date.now();
+      const debounceMs = 1000;
+
+      // 1. Debounce check
+      if (now - (window as any)._lastAiClick < debounceMs) {
+        console.warn("[Dashboard] REQUEST BLOCKED: Click debounced");
+        return;
+      }
+      (window as any)._lastAiClick = now;
+
+      // 2. HARD Request Lock
+      if ((window as any)._aiRequestPending) {
+        console.error("[Dashboard] REQUEST BLOCKED: already in progress");
+        toast({
+          title: "Request in progress",
+          description: "Please wait for the current generation to finish.",
+        });
+        return;
+      }
+
       if (
         !formData.brand.trim() ||
         !formData.product.trim() ||
@@ -122,13 +145,8 @@ export default function Dashboard() {
         return;
       }
 
-      const payload: GenerateCampaignBody = {
-        brand: formData.brand.trim(),
-        product: formData.product.trim(),
-        audience: formData.audience.trim(),
-        theme: formData.theme,
-      };
-
+      console.log(`[Dashboard] REQUEST STARTED: ${type}`);
+      (window as any)._aiRequestPending = true;
       setLoadingModule(type);
       setLoadingMessage(LOADING_MESSAGES[type]);
 
@@ -137,38 +155,64 @@ export default function Dashboard() {
         
         switch (type) {
           case "campaign":
-            data = await campaignMutation.mutateAsync({ data: payload }) as any;
+            data = await campaignMutation.mutateAsync({ data: {
+              brand: formData.brand.trim(),
+              product: formData.product.trim(),
+              audience: formData.audience.trim(),
+              theme: formData.theme,
+            } }) as any;
             break;
           case "strategy":
-            data = await strategyMutation.mutateAsync({ data: payload }) as any;
+            data = await strategyMutation.mutateAsync({ data: {
+              brand: formData.brand.trim(),
+              product: formData.product.trim(),
+              audience: formData.audience.trim(),
+              theme: formData.theme,
+            } }) as any;
             break;
           case "video":
-            data = await videoPlanMutation.mutateAsync({ data: payload }) as any;
+            data = await videoPlanMutation.mutateAsync({ data: {
+              brand: formData.brand.trim(),
+              product: formData.product.trim(),
+              audience: formData.audience.trim(),
+              theme: formData.theme,
+            } }) as any;
             break;
           case "brand":
-            data = await brandMutation.mutateAsync({ data: payload }) as any;
+            data = await brandMutation.mutateAsync({ data: {
+              brand: formData.brand.trim(),
+              product: formData.product.trim(),
+              audience: formData.audience.trim(),
+              theme: formData.theme,
+            } }) as any;
             break;
           case "influencer":
-            data = await influencerMutation.mutateAsync({ data: payload }) as any;
+            data = await influencerMutation.mutateAsync({ data: {
+              brand: formData.brand.trim(),
+              product: formData.product.trim(),
+              audience: formData.audience.trim(),
+              theme: formData.theme,
+            } }) as any;
             break;
           case "trends":
-            data = await trendsMutation.mutateAsync({ data: payload }) as any;
+            data = await trendsMutation.mutateAsync({ data: {
+              brand: formData.brand.trim(),
+              product: formData.product.trim(),
+              audience: formData.audience.trim(),
+              theme: formData.theme,
+            } }) as any;
             break;
           default:
             throw new Error(`Unknown type: ${type}`);
         }
 
-        console.log(`[Dashboard] Received data for ${type}:`, data);
+        console.log(`[Dashboard] REQUEST COMPLETED: ${type}`, data);
 
         if (!data) {
           throw new Error("Generation failed: No data returned from AI");
         }
 
-        setResults((prev) => {
-          const next = { ...prev, [type]: data };
-          console.log("[Dashboard] Updated results state:", next);
-          return next;
-        });
+        setResults((prev) => ({ ...prev, [type]: data }));
         setActiveTab(type);
         toast({
           title: "Generated!",
@@ -183,6 +227,7 @@ export default function Dashboard() {
           variant: "destructive",
         });
       } finally {
+        (window as any)._aiRequestPending = false;
         setLoadingModule(null);
         setLoadingMessage("");
       }
