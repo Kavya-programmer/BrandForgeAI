@@ -123,8 +123,9 @@ export const CURATED_INFLUENCERS = [
 
 export function getGroqClient(): Groq | null {
   const key = process.env.GROQ_API_KEY;
+  console.log("[RUNTIME DIAGNOSTIC] GROQ KEY EXISTS:", !!key);
   if (!key) {
-    console.error("❌ GROQ_API_KEY missing");
+    console.error("❌ GROQ_API_KEY missing in process.env");
     return null;
   }
   return new Groq({ apiKey: key });
