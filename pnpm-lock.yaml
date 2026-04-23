@@ -250,6 +250,9 @@ importers:
       '@tanstack/react-query':
         specifier: 'catalog:'
         version: 5.99.2(react@19.1.0)
+      '@types/express':
+        specifier: ^5.0.6
+        version: 5.0.6
       '@types/node':
         specifier: 'catalog:'
         version: 25.6.0
@@ -280,6 +283,9 @@ importers:
       embla-carousel-react:
         specifier: ^8.6.0
         version: 8.6.0(react@19.1.0)
+      express:
+        specifier: ^5
+        version: 5.2.1
       framer-motion:
         specifier: 'catalog:'
         version: 12.38.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -322,6 +328,9 @@ importers:
       tailwindcss:
         specifier: 'catalog:'
         version: 4.2.4
+      tsx:
+        specifier: 'catalog:'
+        version: 4.21.0
       tw-animate-css:
         specifier: ^1.4.0
         version: 1.4.0

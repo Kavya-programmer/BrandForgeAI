@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Users, MapPin, Globe, Lightbulb, Star, MessageSquare } from "lucide-react";
 import type { InfluencerResult } from "@workspace/api-client-react";
 import { CopyButton } from "@/components/ui/copy-button";
+import { ViralityGauge } from "@/components/ui/virality-gauge";
 
 // Backend sends collaborationIdeas + influencerTypes but they're not in the schema
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -27,6 +28,14 @@ const PLATFORM_STYLES: Record<string, string> = {
 };
 
 export function InfluencerPanel({ data }: InfluencerPanelProps) {
+  if (!data) {
+    return (
+      <div className="p-8 text-center glass rounded-2xl border border-dashed border-border/60">
+        <p className="text-muted-foreground italic">Influencer data is unavailable.</p>
+      </div>
+    );
+  }
+
   const name = data.name || data.selectedInfluencerName || "Influencer Persona";
   const handle = data.handle || `@${name.toLowerCase().replace(/\s/g, "")}`;
   const collaborationIdeas = Array.isArray(data.collaborationIdeas) ? data.collaborationIdeas : [];
@@ -38,7 +47,13 @@ export function InfluencerPanel({ data }: InfluencerPanelProps) {
   // Generate a consistent avatar background from name
   const avatarColors = ["from-violet-500 to-purple-600", "from-pink-500 to-rose-600", "from-emerald-500 to-teal-600", "from-amber-500 to-orange-600"];
   const avatarGradient = avatarColors[(name.charCodeAt(0) || 0) % avatarColors.length];
-  const initials = name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+  const initials = name
+    .split(" ")
+    .filter(Boolean)
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() || "AI";
 
   return (
     <motion.div variants={STAGGER.container} initial="hidden" animate="show" className="space-y-4">
@@ -232,8 +247,8 @@ export function InfluencerPanel({ data }: InfluencerPanelProps) {
       {/* Virality Score */}
       <motion.div variants={STAGGER.item}>
         <ViralityGauge
-          score={data.viralityScore}
-          estimatedViews={data.estimatedViews}
+          score={data.viralityScore || 75}
+          estimatedViews={data.estimatedViews || "500K-1M views"}
           explanation={data.viralityExplanation || "Virality breakdown pending."}
         />
       </motion.div>

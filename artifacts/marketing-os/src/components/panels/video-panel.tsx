@@ -33,6 +33,15 @@ const VERSION_LABELS = [
 
 export function VideoPanel({ data, videoUrl }: VideoPanelProps) {
   const [expandedTool, setExpandedTool] = useState<string | null>(null);
+
+  if (!data) {
+    return (
+      <div className="p-8 text-center glass rounded-2xl border border-dashed border-border/60">
+        <p className="text-muted-foreground italic">Video plan data is unavailable.</p>
+      </div>
+    );
+  }
+
   const scenes = Array.isArray(data.scenes) ? data.scenes : [];
   const script = data.script || data.adScript || "Video script pending generation.";
 
@@ -59,14 +68,14 @@ export function VideoPanel({ data, videoUrl }: VideoPanelProps) {
           <Film className="w-4 h-4 text-blue-400" />
           <span className="section-label">Scene Timeline</span>
           <CopyButton
-            text={scenes.map((s) => `Scene ${s.sceneNumber} (${s.duration}): ${s.visual} | ${s.audio}`).join("\n")}
+            text={scenes.map((s) => `Scene ${s?.sceneNumber || ""} (${s?.duration || ""}): ${s?.visual || ""} | ${s?.audio || ""}`).join("\n")}
             className="ml-auto"
           />
         </div>
         <div className="p-4 space-y-3">
           {scenes.length > 0 ? scenes.map((scene, i) => (
             <motion.div
-              key={scene.sceneNumber || i}
+              key={scene?.sceneNumber || i}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.1 }}
@@ -75,7 +84,7 @@ export function VideoPanel({ data, videoUrl }: VideoPanelProps) {
               {/* Scene number + timeline */}
               <div className="flex flex-col items-center">
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0">
-                  <span className="text-xs font-bold text-white">{scene.sceneNumber}</span>
+                  <span className="text-xs font-bold text-white">{scene?.sceneNumber || i + 1}</span>
                 </div>
                 {i < scenes.length - 1 && (
                   <div className="w-px h-full min-h-[12px] bg-border/60 mt-1 mb-0" />
@@ -85,14 +94,14 @@ export function VideoPanel({ data, videoUrl }: VideoPanelProps) {
               {/* Scene content */}
               <div className="flex-1 pb-3">
                 <div className="flex items-center gap-2 mb-1.5">
-                  <span className="chip chip-primary">{scene.duration || "5s"}</span>
+                  <span className="chip chip-primary">{scene?.duration || "5s"}</span>
                   <span className="text-[11px] text-muted-foreground flex items-center gap-1">
-                    <Camera className="w-3 h-3" /> {scene.cameraAngle || "Medium Shot"}
+                    <Camera className="w-3 h-3" /> {scene?.cameraAngle || "Medium Shot"}
                   </span>
                 </div>
-                <p className="text-sm text-foreground/90 leading-relaxed mb-1">{scene.visual}</p>
-                <p className="text-xs text-muted-foreground">{scene.audio}</p>
-                {scene.textOverlay && (
+                <p className="text-sm text-foreground/90 leading-relaxed mb-1">{scene?.visual || "Visual description pending."}</p>
+                <p className="text-xs text-muted-foreground">{scene?.audio || "Audio cues pending."}</p>
+                {scene?.textOverlay && (
                   <div className="mt-1.5 inline-flex items-center gap-1 text-[11px] text-amber-400 bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded-md">
                     <Type className="w-3 h-3" />
                     {scene.textOverlay}

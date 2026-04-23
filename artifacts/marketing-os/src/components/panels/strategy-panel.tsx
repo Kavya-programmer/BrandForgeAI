@@ -28,8 +28,22 @@ const PLATFORMS = [
 
 export function StrategyPanel({ data }: StrategyPanelProps) {
   const [activeHook, setActiveHook] = useState(0);
+
+  if (!data) {
+    return (
+      <div className="p-8 text-center glass rounded-2xl border border-dashed border-border/60">
+        <p className="text-muted-foreground italic">Strategy data is unavailable.</p>
+      </div>
+    );
+  }
+
   const viralHooks = Array.isArray(data.viralHooks) ? data.viralHooks : [];
   const sloganIdeas = Array.isArray(data.sloganIdeas) ? data.sloganIdeas : [];
+  const positioning = data.positioning || data.brandPositioning || "Positioning strategy not available.";
+  const keyMessage = data.keyMessage || "Core message pending.";
+  const audiencePsychology = data.audiencePsychology || data.coreStrategy || "Audience insights not available.";
+  const competitorAngle = data.competitorAngle || "Market competition analysis pending.";
+  const platformStrategy = data.platformStrategy || data.coreStrategy || "Platform rollout plan pending.";
 
   return (
     <motion.div variants={STAGGER.container} initial="hidden" animate="show" className="space-y-4">
@@ -45,23 +59,21 @@ export function StrategyPanel({ data }: StrategyPanelProps) {
           <span className="section-label">Market Positioning</span>
         </div>
         <div className="flex justify-between items-start gap-3">
-          <p className="text-sm text-foreground/90 leading-relaxed flex-1">{data.positioning || data.brandPositioning || "Positioning strategy not available."}</p>
-          <CopyButton text={data.positioning || data.brandPositioning || ""} className="shrink-0 mt-0.5" />
+          <p className="text-sm text-foreground/90 leading-relaxed flex-1">{positioning}</p>
+          <CopyButton text={positioning} className="shrink-0 mt-0.5" />
         </div>
       </motion.div>
 
       {/* Key Message */}
-      {(data.keyMessage) && (
-        <motion.div variants={STAGGER.item}
-          className="rounded-2xl border border-primary/25 px-6 py-5 glow-primary-sm"
-          style={{ background: "linear-gradient(135deg, hsl(252,100%,72%,0.08), hsl(290,100%,70%,0.05))" }}>
-          <div className="flex items-center gap-2 mb-2">
-            <Zap className="w-4 h-4 text-primary" />
-            <span className="section-label text-primary/70">Core Message</span>
-          </div>
-          <p className="text-xl font-semibold text-foreground leading-snug">{data.keyMessage}</p>
-        </motion.div>
-      )}
+      <motion.div variants={STAGGER.item}
+        className="rounded-2xl border border-primary/25 px-6 py-5 glow-primary-sm"
+        style={{ background: "linear-gradient(135deg, hsl(252,100%,72%,0.08), hsl(290,100%,70%,0.05))" }}>
+        <div className="flex items-center gap-2 mb-2">
+          <Zap className="w-4 h-4 text-primary" />
+          <span className="section-label text-primary/70">Core Message</span>
+        </div>
+        <p className="text-xl font-semibold text-foreground leading-snug">{keyMessage}</p>
+      </motion.div>
 
       {/* Audience Psychology */}
       <motion.div variants={STAGGER.item} className="glass rounded-2xl border border-border/60 px-6 py-5">
@@ -70,9 +82,9 @@ export function StrategyPanel({ data }: StrategyPanelProps) {
             <Brain className="w-4 h-4 text-violet-400" />
             <span className="section-label">Audience Psychology</span>
           </div>
-          <CopyButton text={data.audiencePsychology || data.coreStrategy || ""} />
+          <CopyButton text={audiencePsychology} />
         </div>
-        <p className="text-sm text-foreground/85 leading-relaxed">{data.audiencePsychology || data.coreStrategy || "Audience insights not available."}</p>
+        <p className="text-sm text-foreground/85 leading-relaxed">{audiencePsychology}</p>
       </motion.div>
 
       {/* Viral Hooks — interactive flashcards */}
@@ -91,7 +103,7 @@ export function StrategyPanel({ data }: StrategyPanelProps) {
               animate={{ opacity: 1, x: 0 }}
               className="text-base font-medium text-foreground leading-snug"
             >
-              &ldquo;{viralHooks[activeHook]}&rdquo;
+              &ldquo;{viralHooks[activeHook] || "Hook not available"}&rdquo;
             </motion.p>
           </div>
           {/* Hook selector pills */}
@@ -144,10 +156,10 @@ export function StrategyPanel({ data }: StrategyPanelProps) {
               <Target className="w-4 h-4 text-emerald-400" />
               <span className="section-label">Competitor Angle</span>
             </div>
-            <CopyButton text={data.competitorAngle || ""} />
+            <CopyButton text={competitorAngle} />
           </div>
           <div className="px-5 py-4">
-            <p className="text-sm text-foreground/85 leading-relaxed">{data.competitorAngle || "Market competition analysis pending."}</p>
+            <p className="text-sm text-foreground/85 leading-relaxed">{competitorAngle}</p>
           </div>
         </motion.div>
       </div>
@@ -156,7 +168,7 @@ export function StrategyPanel({ data }: StrategyPanelProps) {
       <motion.div variants={STAGGER.item} className="glass rounded-2xl border border-border/60 overflow-hidden">
         <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border/40">
           <span className="section-label">Platform Strategy</span>
-          <CopyButton text={data.platformStrategy || data.coreStrategy || ""} />
+          <CopyButton text={platformStrategy} />
         </div>
         {/* Platform icons row */}
         <div className="flex gap-2 px-5 pt-4">
@@ -169,15 +181,15 @@ export function StrategyPanel({ data }: StrategyPanelProps) {
           ))}
         </div>
         <div className="px-5 pb-5 pt-3">
-          <p className="text-sm text-foreground/85 leading-relaxed">{data.platformStrategy || data.coreStrategy || "Platform rollout plan pending."}</p>
+          <p className="text-sm text-foreground/85 leading-relaxed">{platformStrategy}</p>
         </div>
       </motion.div>
 
       {/* Virality Score */}
       <motion.div variants={STAGGER.item}>
         <ViralityGauge
-          score={data.viralityScore}
-          estimatedViews={data.estimatedViews}
+          score={data.viralityScore || 70}
+          estimatedViews={data.estimatedViews || "100K-500K views"}
           explanation={data.viralityExplanation || "Virality breakdown pending."}
         />
       </motion.div>
