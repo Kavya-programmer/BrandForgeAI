@@ -101,8 +101,24 @@ export function CampaignPanel({ data }: CampaignPanelProps) {
     return <div className="p-6 text-gray-500 glass rounded-2xl border border-dashed border-border/60">No campaign data available</div>;
   }
 
+  const getString = (val: any, fallback: string = "—"): string => {
+    if (typeof val === "string") return val;
+    if (val && typeof val === "object") {
+      return val.text || val.description || val.content || val.idea || val.message || val.strategy || JSON.stringify(val);
+    }
+    return fallback;
+  };
+
+  const campaignIdea = getString(data?.campaignIdea);
+  const keyMessage = getString(data?.keyMessage);
+  const coreStrategy = getString(data?.coreStrategy);
+  const brandPositioning = getString(data?.brandPositioning);
+  const influencerAngles = getString(data?.influencerAngles);
+  const videoStoryboard = getString(data?.videoStoryboard);
+  const adScript = getString(data?.adScript);
+
   // Parse social content sections
-  const socialContent = data.socialContent || "";
+  const socialContent = getString(data?.socialContent, "");
   const socialParts = socialContent.split(/(?:instagram|tiktok|twitter|tweet|linkedin)/i);
 
   const socialPlatforms = [
@@ -132,9 +148,9 @@ export function CampaignPanel({ data }: CampaignPanelProps) {
               </div>
               <span className="text-xs font-semibold uppercase tracking-wider text-primary/70">Campaign Idea</span>
             </div>
-            <CopyButton text={data?.campaignIdea || ""} />
+            <CopyButton text={campaignIdea} />
           </div>
-          <p className="text-base text-foreground leading-relaxed font-medium">{data?.campaignIdea || "—"}</p>
+          <p className="text-base text-foreground leading-relaxed font-medium">{campaignIdea || "—"}</p>
         </div>
       </motion.div>
 
@@ -145,9 +161,9 @@ export function CampaignPanel({ data }: CampaignPanelProps) {
             <MessageSquare className="w-4 h-4 text-primary" />
             <span className="section-label">Key Message</span>
           </div>
-          <CopyButton text={data?.keyMessage || ""} />
+          <CopyButton text={keyMessage} />
         </div>
-        <p className="text-xl font-semibold text-foreground leading-snug">{data?.keyMessage || "—"}</p>
+        <p className="text-xl font-semibold text-foreground leading-snug">{keyMessage || "—"}</p>
       </motion.div>
 
       {/* 2-col grid */}
@@ -156,15 +172,15 @@ export function CampaignPanel({ data }: CampaignPanelProps) {
         <Card icon={Target} title="Core Strategy" gradient="bg-gradient-to-br from-emerald-500 to-teal-600">
           <div className="flex justify-between items-start gap-3">
             <div className="space-y-2 flex-1">
-              {(data?.coreStrategy || "").split("\n").filter(Boolean).map((line, i) => (
+              {(coreStrategy || "").split("\n").filter(Boolean).map((line, i) => (
                 <div key={i} className="flex items-start gap-2 text-sm text-foreground/90">
                   <span className="text-emerald-400 mt-0.5 shrink-0">•</span>
                   <span className="leading-relaxed">{line.replace(/^[•\-\*]\s*/, "")}</span>
                 </div>
               ))}
-              {!data?.coreStrategy && <p className="text-sm text-muted-foreground italic">No strategy details available.</p>}
+              {!coreStrategy && <p className="text-sm text-muted-foreground italic">No strategy details available.</p>}
             </div>
-            <CopyButton text={data?.coreStrategy || ""} className="shrink-0" />
+            <CopyButton text={coreStrategy} className="shrink-0" />
           </div>
         </Card>
 
@@ -172,15 +188,15 @@ export function CampaignPanel({ data }: CampaignPanelProps) {
         <TextCard
           icon={Lightbulb}
           title="Brand Positioning"
-          content={data?.brandPositioning || "—"}
+          content={brandPositioning}
           gradient="bg-gradient-to-br from-violet-500 to-purple-600"
         />
 
         {/* Video Storyboard */}
         <Card icon={Film} title="Video Storyboard" gradient="bg-gradient-to-br from-blue-500 to-indigo-600">
           <div className="flex justify-between items-start gap-3">
-            <p className="text-xs text-muted-foreground leading-relaxed font-mono flex-1 whitespace-pre-wrap">{data?.videoStoryboard || "—"}</p>
-            <CopyButton text={data?.videoStoryboard || ""} className="shrink-0" />
+            <p className="text-xs text-muted-foreground leading-relaxed font-mono flex-1 whitespace-pre-wrap">{videoStoryboard}</p>
+            <CopyButton text={videoStoryboard} className="shrink-0" />
           </div>
         </Card>
 
@@ -188,7 +204,7 @@ export function CampaignPanel({ data }: CampaignPanelProps) {
         <TextCard
           icon={Users}
           title="Influencer Angles"
-          content={data?.influencerAngles || "—"}
+          content={influencerAngles}
           gradient="bg-gradient-to-br from-amber-500 to-orange-600"
         />
       </div>
@@ -231,10 +247,10 @@ export function CampaignPanel({ data }: CampaignPanelProps) {
           <div className="terminal-dot bg-yellow-500/80" />
           <div className="terminal-dot bg-green-500/80" />
           <span className="ml-2 text-[11px] text-muted-foreground flex-1">ad-script.txt</span>
-          <CopyButton text={data?.adScript || ""} />
+          <CopyButton text={adScript} />
         </div>
         <div className="px-4 py-4">
-          <pre className="text-xs leading-relaxed text-emerald-300/80 whitespace-pre-wrap">{data?.adScript || "Ad script pending generation."}</pre>
+          <pre className="text-xs leading-relaxed text-emerald-300/80 whitespace-pre-wrap">{adScript || "Ad script pending generation."}</pre>
         </div>
       </motion.div>
 

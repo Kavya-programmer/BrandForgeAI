@@ -39,8 +39,16 @@ export function VideoPanel({ data, videoUrl }: VideoPanelProps) {
     return <div className="p-6 text-gray-500 glass rounded-2xl border border-dashed border-border/60">No video data available</div>;
   }
 
+  const getString = (val: any, fallback: string = "—"): string => {
+    if (typeof val === "string") return val;
+    if (val && typeof val === "object") {
+      return val.text || val.description || val.content || val.script || val.visual || JSON.stringify(val);
+    }
+    return fallback;
+  };
+
   const scenes = Array.isArray(data?.scenes) ? data.scenes : [];
-  const script = data?.script || data?.adScript || "—";
+  const script = getString(data?.script || data?.adScript);
 
   return (
     <motion.div variants={STAGGER.container} initial="hidden" animate="show" className="space-y-4">

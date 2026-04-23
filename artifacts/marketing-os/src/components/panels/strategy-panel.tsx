@@ -34,13 +34,22 @@ export function StrategyPanel({ data }: StrategyPanelProps) {
     return <div className="p-6 text-gray-500 glass rounded-2xl border border-dashed border-border/60">No strategy data available</div>;
   }
 
+  const getString = (val: any, fallback: string = "—"): string => {
+    if (typeof val === "string") return val;
+    if (val && typeof val === "object") {
+      // Common nested fields from AI responses
+      return val.statement || val.description || val.strategy || val.text || val.content || JSON.stringify(val);
+    }
+    return fallback;
+  };
+
   const viralHooks = Array.isArray(data?.viralHooks) ? data.viralHooks : [];
   const sloganIdeas = Array.isArray(data?.sloganIdeas) ? data.sloganIdeas : [];
-  const positioning = data?.positioning || data?.brandPositioning || "—";
-  const keyMessage = data?.keyMessage || "—";
-  const audiencePsychology = data?.audiencePsychology || data?.coreStrategy || "—";
-  const competitorAngle = data?.competitorAngle || "—";
-  const platformStrategy = data?.platformStrategy || data?.coreStrategy || "—";
+  const positioning = getString(data?.positioning || data?.brandPositioning);
+  const keyMessage = getString(data?.keyMessage);
+  const audiencePsychology = getString(data?.audiencePsychology || data?.coreStrategy);
+  const competitorAngle = getString(data?.competitorAngle);
+  const platformStrategy = getString(data?.platformStrategy || data?.coreStrategy);
 
   return (
     <motion.div variants={STAGGER.container} initial="hidden" animate="show" className="space-y-4">

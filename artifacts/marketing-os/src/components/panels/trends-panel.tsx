@@ -34,9 +34,20 @@ export function TrendsPanel({ data }: TrendsPanelProps) {
     return <div className="p-6 text-gray-500 glass rounded-2xl border border-dashed border-border/60">No trends data available</div>;
   }
 
+  const getString = (val: any, fallback: string = "—"): string => {
+    if (typeof val === "string") return val;
+    if (val && typeof val === "object") {
+      return val.statement || val.description || val.strategy || val.text || val.content || val.formula || val.advice || JSON.stringify(val);
+    }
+    return fallback;
+  };
+
   const currentTrends = Array.isArray(data?.currentTrends) ? data.currentTrends : [];
   const trendHooks = Array.isArray(data?.trendHooks) ? data.trendHooks : [];
-  const adaptedCampaign = data?.adaptedCampaign || data?.campaignIdea || "—";
+  const adaptedCampaign = getString(data?.adaptedCampaign || data?.campaignIdea);
+  const viralFormula = getString(data?.viralFormula || data?.coreStrategy);
+  const timingAdvice = getString(data?.timingAdvice);
+  const hashtagStrategy = getString(data?.hashtagStrategy);
 
   return (
     <motion.div variants={STAGGER.container} initial="hidden" animate="show" className="space-y-4">
@@ -132,16 +143,16 @@ export function TrendsPanel({ data }: TrendsPanelProps) {
           <motion.div variants={STAGGER.item} className="glass rounded-2xl border border-border/60 p-5">
             <div className="flex items-center justify-between mb-3">
               <span className="section-label">Viral Formula</span>
-              <CopyButton text={data?.viralFormula || data?.coreStrategy || ""} />
+              <CopyButton text={viralFormula} />
             </div>
-            <p className="text-sm text-foreground/85 leading-relaxed">{data?.viralFormula || data?.coreStrategy || "Viral formula not available."}</p>
+            <p className="text-sm text-foreground/85 leading-relaxed">{viralFormula || "Viral formula not available."}</p>
           </motion.div>
           <motion.div variants={STAGGER.item} className="glass rounded-2xl border border-border/60 p-5">
             <div className="flex items-center justify-between mb-3">
               <span className="section-label">Timing Strategy</span>
-              <CopyButton text={data?.timingAdvice || ""} />
+              <CopyButton text={timingAdvice} />
             </div>
-            <p className="text-sm text-foreground/85 leading-relaxed">{data?.timingAdvice || "Optimal timing data pending."}</p>
+            <p className="text-sm text-foreground/85 leading-relaxed">{timingAdvice || "Optimal timing data pending."}</p>
           </motion.div>
         </div>
       </div>
@@ -153,9 +164,9 @@ export function TrendsPanel({ data }: TrendsPanelProps) {
             <Hash className="w-4 h-4 text-cyan-400" />
             <span className="section-label">Hashtag Strategy</span>
           </div>
-          <CopyButton text={data?.hashtagStrategy || ""} />
+          <CopyButton text={hashtagStrategy} />
         </div>
-        <p className="text-sm text-foreground/85 leading-relaxed mb-4">{data?.hashtagStrategy || "Hashtag strategy pending."}</p>
+        <p className="text-sm text-foreground/85 leading-relaxed mb-4">{hashtagStrategy || "Hashtag strategy pending."}</p>
         {/* Hashtag chips */}
         {Array.isArray(data.hashtags) && data.hashtags.length > 0 && (
           <div className="flex flex-wrap gap-2">

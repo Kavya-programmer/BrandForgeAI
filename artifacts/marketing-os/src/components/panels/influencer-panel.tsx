@@ -33,13 +33,24 @@ export function InfluencerPanel({ data }: InfluencerPanelProps) {
     return <div className="p-6 text-gray-500 glass rounded-2xl border border-dashed border-border/60">No influencer data available</div>;
   }
 
-  const name = data?.name || data?.selectedInfluencerName || "Influencer Persona";
-  const handle = data?.handle || `@${name.toLowerCase().replace(/\s/g, "")}`;
+  const getString = (val: any, fallback: string = "—"): string => {
+    if (typeof val === "string") return val;
+    if (val && typeof val === "object") {
+      return val.text || val.description || val.content || val.bio || val.style || val.angle || JSON.stringify(val);
+    }
+    return fallback;
+  };
+
+  const name = getString(data?.name || data?.selectedInfluencerName, "Influencer Persona");
+  const handle = getString(data?.handle, `@${name.toLowerCase().replace(/\s/g, "")}`);
   const collaborationIdeas = Array.isArray(data?.collaborationIdeas) ? data.collaborationIdeas : [];
   const contentPillars = Array.isArray(data?.contentPillars) ? data.contentPillars : [];
   const sampleCaptions = Array.isArray(data?.sampleCaptions) ? data.sampleCaptions : [];
   const platforms = Array.isArray(data?.platforms) ? data.platforms : ["Instagram", "TikTok"];
   const influencerTypes = Array.isArray(data?.influencerTypes) ? data.influencerTypes : [];
+  const bio = getString(data?.bio || data?.campaignIdea);
+  const contentStyle = getString(data?.contentStyle || data?.coreStrategy);
+  const brandCollabAngle = getString(data?.brandCollabAngle || data?.influencerAngles);
 
   // Generate a consistent avatar background from name
   const avatarColors = ["from-violet-500 to-purple-600", "from-pink-500 to-rose-600", "from-emerald-500 to-teal-600", "from-amber-500 to-orange-600"];
@@ -114,8 +125,8 @@ export function InfluencerPanel({ data }: InfluencerPanelProps) {
           {/* Bio */}
           <div className="bg-secondary/60 rounded-xl p-3">
             <div className="flex justify-between items-start gap-2">
-              <p className="text-sm text-foreground/85 leading-relaxed flex-1 italic">&ldquo;{data.bio || data.campaignIdea || "AI Influencer profile pending."}&rdquo;</p>
-              <CopyButton text={data.bio || data.campaignIdea || ""} className="shrink-0" />
+              <p className="text-sm text-foreground/85 leading-relaxed flex-1 italic">&ldquo;{bio || "AI Influencer profile pending."}&rdquo;</p>
+              <CopyButton text={bio} className="shrink-0" />
             </div>
           </div>
         </div>
@@ -129,9 +140,9 @@ export function InfluencerPanel({ data }: InfluencerPanelProps) {
               <Globe className="w-4 h-4 text-cyan-400" />
               <span className="section-label">Content Style</span>
             </div>
-            <CopyButton text={data.contentStyle || data.coreStrategy || ""} />
+            <CopyButton text={contentStyle} />
           </div>
-          <p className="text-sm text-foreground/85 leading-relaxed">{data.contentStyle || data.coreStrategy || "Content direction pending."}</p>
+          <p className="text-sm text-foreground/85 leading-relaxed">{contentStyle}</p>
         </motion.div>
 
         {influencerTypes.length > 0 && (
@@ -182,9 +193,9 @@ export function InfluencerPanel({ data }: InfluencerPanelProps) {
             <Star className="w-4 h-4 text-violet-400" />
             <span className="section-label">Collaboration Angle</span>
           </div>
-          <CopyButton text={data.brandCollabAngle || data.influencerAngles || ""} />
+          <CopyButton text={brandCollabAngle} />
         </div>
-        <p className="text-sm text-foreground/85 leading-relaxed">{data.brandCollabAngle || data.influencerAngles || "Partnership strategy pending."}</p>
+        <p className="text-sm text-foreground/85 leading-relaxed">{brandCollabAngle}</p>
       </motion.div>
 
       {/* Collab Ideas */}

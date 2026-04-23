@@ -22,10 +22,18 @@ export function BrandPanel({ data }: BrandPanelProps) {
     return <div className="p-6 text-gray-500 glass rounded-2xl border border-dashed border-border/60">No brand data available</div>;
   }
 
-  const tagline = data?.tagline || "—";
-  const brandArchetype = data?.brandArchetype || "Modern Innovator";
+  const getString = (val: any, fallback: string = "—"): string => {
+    if (typeof val === "string") return val;
+    if (val && typeof val === "object") {
+      return val.text || val.description || val.content || val.tagline || val.voice || val.archetype || JSON.stringify(val);
+    }
+    return fallback;
+  };
+
+  const tagline = getString(data?.tagline);
+  const brandArchetype = getString(data?.brandArchetype, "Modern Innovator");
   const colorPalette = Array.isArray(data?.colorPalette) ? data.colorPalette : [];
-  const brandVoice = data?.brandVoice || "—";
+  const brandVoice = getString(data?.brandVoice);
   const fontPairings = Array.isArray(data?.fontPairings) ? data.fontPairings : [];
   const moodboardKeywords = Array.isArray(data?.moodboardKeywords) ? data.moodboardKeywords : [];
 
