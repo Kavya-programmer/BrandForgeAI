@@ -61,10 +61,9 @@ function isUrl(input: RequestInfo | URL): input is URL {
 }
 
 function applyBaseUrl(input: RequestInfo | URL): RequestInfo | URL {
-  if (!_baseUrl) return input;
   const url = resolveUrl(input);
   // Only prepend to relative paths (starting with /)
-  if (!url.startsWith("/")) return input;
+  if (!url.startsWith("/") || !_baseUrl) return input;
 
   const absolute = `${_baseUrl}${url}`;
   if (typeof input === "string") return absolute;
@@ -370,10 +369,11 @@ export async function customFetch<T = unknown>(
   const body = await parseSuccessBody(response, responseType, requestInfo);
 
   // Handle standard ApiResponse wrapper { error, message, data }
-  if (body && typeof body === "object" && "error" in body) {
+  if (body !== null && typeof body === "object" && "error" in body) {
     const apiResponse = body as { error: boolean; message: string; data?: any };
     
     if (apiResponse.error) {
+      console.error("[customFetch] Logical API Error:", apiResponse.message);
       throw new ApiError(response, body, requestInfo);
     }
     

@@ -136,27 +136,27 @@ export function MainContent({
               )}
               {activeTab === "strategy" && results.strategy && (
                 <motion.div key="strategy" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <StrategyPanel data={results.strategy} />
+                  <StrategyPanel data={results.strategy as any} />
                 </motion.div>
               )}
               {activeTab === "video" && results.video && (
                 <motion.div key="video" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <VideoPanel data={results.video} />
+                  <VideoPanel data={results.video as any} />
                 </motion.div>
               )}
               {activeTab === "brand" && results.brand && (
                 <motion.div key="brand" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <BrandPanel data={results.brand} />
+                  <BrandPanel data={results.brand as any} />
                 </motion.div>
               )}
               {activeTab === "influencer" && results.influencer && (
                 <motion.div key="influencer" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <InfluencerPanel data={results.influencer} />
+                  <InfluencerPanel data={results.influencer as any} />
                 </motion.div>
               )}
               {activeTab === "trends" && results.trends && (
                 <motion.div key="trends" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <TrendsPanel data={results.trends} />
+                  <TrendsPanel data={results.trends as any} />
                 </motion.div>
               )}
 

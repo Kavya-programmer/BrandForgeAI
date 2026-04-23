@@ -158,11 +158,17 @@ export default function Dashboard() {
             throw new Error(`Unknown type: ${type}`);
         }
 
+        console.log(`[Dashboard] Received data for ${type}:`, data);
+
         if (!data) {
           throw new Error("Generation failed: No data returned from AI");
         }
 
-        setResults((prev) => ({ ...prev, [type]: data }));
+        setResults((prev) => {
+          const next = { ...prev, [type]: data };
+          console.log("[Dashboard] Updated results state:", next);
+          return next;
+        });
         setActiveTab(type);
         toast({
           title: "Generated!",
