@@ -96,12 +96,8 @@ function TextCard({
 }
 
 export function CampaignPanel({ data }: CampaignPanelProps) {
-  if (!data) {
-    return (
-      <div className="p-8 text-center glass rounded-2xl border border-dashed border-border/60">
-        <p className="text-muted-foreground italic">Campaign data is unavailable.</p>
-      </div>
-    );
+  if (!data || typeof data !== "object") {
+    return <div className="p-6 text-gray-500 glass rounded-2xl border border-dashed border-border/60">No campaign data available</div>;
   }
 
   // Parse social content sections
@@ -135,9 +131,9 @@ export function CampaignPanel({ data }: CampaignPanelProps) {
               </div>
               <span className="text-xs font-semibold uppercase tracking-wider text-primary/70">Campaign Idea</span>
             </div>
-            <CopyButton text={data.campaignIdea || ""} />
+            <CopyButton text={data?.campaignIdea || ""} />
           </div>
-          <p className="text-base text-foreground leading-relaxed font-medium">{data.campaignIdea || "No campaign idea generated."}</p>
+          <p className="text-base text-foreground leading-relaxed font-medium">{data?.campaignIdea || "—"}</p>
         </div>
       </motion.div>
 
@@ -148,9 +144,9 @@ export function CampaignPanel({ data }: CampaignPanelProps) {
             <MessageSquare className="w-4 h-4 text-primary" />
             <span className="section-label">Key Message</span>
           </div>
-          <CopyButton text={data.keyMessage || ""} />
+          <CopyButton text={data?.keyMessage || ""} />
         </div>
-        <p className="text-xl font-semibold text-foreground leading-snug">{data.keyMessage || "No key message defined."}</p>
+        <p className="text-xl font-semibold text-foreground leading-snug">{data?.keyMessage || "—"}</p>
       </motion.div>
 
       {/* 2-col grid */}
@@ -175,15 +171,15 @@ export function CampaignPanel({ data }: CampaignPanelProps) {
         <TextCard
           icon={Lightbulb}
           title="Brand Positioning"
-          content={data.brandPositioning || "Brand positioning not available."}
+          content={data?.brandPositioning || "—"}
           gradient="bg-gradient-to-br from-violet-500 to-purple-600"
         />
 
         {/* Video Storyboard */}
         <Card icon={Film} title="Video Storyboard" gradient="bg-gradient-to-br from-blue-500 to-indigo-600">
           <div className="flex justify-between items-start gap-3">
-            <p className="text-xs text-muted-foreground leading-relaxed font-mono flex-1 whitespace-pre-wrap">{data.videoStoryboard || "Video plan not available."}</p>
-            <CopyButton text={data.videoStoryboard || ""} className="shrink-0" />
+            <p className="text-xs text-muted-foreground leading-relaxed font-mono flex-1 whitespace-pre-wrap">{data?.videoStoryboard || "—"}</p>
+            <CopyButton text={data?.videoStoryboard || ""} className="shrink-0" />
           </div>
         </Card>
 
@@ -191,7 +187,7 @@ export function CampaignPanel({ data }: CampaignPanelProps) {
         <TextCard
           icon={Users}
           title="Influencer Angles"
-          content={data.influencerAngles || "Influencer strategy not available."}
+          content={data?.influencerAngles || "—"}
           gradient="bg-gradient-to-br from-amber-500 to-orange-600"
         />
       </div>

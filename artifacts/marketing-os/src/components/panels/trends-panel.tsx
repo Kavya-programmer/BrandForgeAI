@@ -29,17 +29,13 @@ const PLATFORM_BADGES: Record<string, string> = {
 };
 
 export function TrendsPanel({ data }: TrendsPanelProps) {
-  if (!data) {
-    return (
-      <div className="p-8 text-center glass rounded-2xl border border-dashed border-border/60">
-        <p className="text-muted-foreground italic">Trends data is unavailable.</p>
-      </div>
-    );
+  if (!data || typeof data !== "object") {
+    return <div className="p-6 text-gray-500 glass rounded-2xl border border-dashed border-border/60">No trends data available</div>;
   }
 
-  const currentTrends = Array.isArray(data.currentTrends) ? data.currentTrends : [];
-  const trendHooks = Array.isArray(data.trendHooks) ? data.trendHooks : [];
-  const adaptedCampaign = data.adaptedCampaign || data.campaignIdea || "Trend adaptation pending.";
+  const currentTrends = Array.isArray(data?.currentTrends) ? data.currentTrends : [];
+  const trendHooks = Array.isArray(data?.trendHooks) ? data.trendHooks : [];
+  const adaptedCampaign = data?.adaptedCampaign || data?.campaignIdea || "—";
 
   return (
     <motion.div variants={STAGGER.container} initial="hidden" animate="show" className="space-y-4">

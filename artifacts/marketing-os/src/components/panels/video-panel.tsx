@@ -34,16 +34,12 @@ const VERSION_LABELS = [
 export function VideoPanel({ data, videoUrl }: VideoPanelProps) {
   const [expandedTool, setExpandedTool] = useState<string | null>(null);
 
-  if (!data) {
-    return (
-      <div className="p-8 text-center glass rounded-2xl border border-dashed border-border/60">
-        <p className="text-muted-foreground italic">Video plan data is unavailable.</p>
-      </div>
-    );
+  if (!data || typeof data !== "object") {
+    return <div className="p-6 text-gray-500 glass rounded-2xl border border-dashed border-border/60">No video data available</div>;
   }
 
-  const scenes = Array.isArray(data.scenes) ? data.scenes : [];
-  const script = data.script || data.adScript || "Video script pending generation.";
+  const scenes = Array.isArray(data?.scenes) ? data.scenes : [];
+  const script = data?.script || data?.adScript || "—";
 
   return (
     <motion.div variants={STAGGER.container} initial="hidden" animate="show" className="space-y-4">
@@ -118,9 +114,9 @@ export function VideoPanel({ data, videoUrl }: VideoPanelProps) {
       {/* Production details row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {[
-          { icon: Music, label: "Music Direction", content: data.musicStyle, color: "text-pink-400" },
-          { icon: Scissors, label: "Editing Style", content: data.editingStyle, color: "text-cyan-400" },
-          { icon: Type, label: "Captions", content: data.captionsText, color: "text-amber-400" },
+          { icon: Music, label: "Music Direction", content: data?.musicStyle, color: "text-pink-400" },
+          { icon: Scissors, label: "Editing Style", content: data?.editingStyle, color: "text-cyan-400" },
+          { icon: Type, label: "Captions", content: data?.captionsText, color: "text-amber-400" },
         ].map(({ icon: Icon, label, content, color }) => (
           <motion.div key={label} variants={STAGGER.item} className="glass rounded-2xl border border-border/60 p-4">
             <div className="flex items-center gap-2 mb-2">
@@ -128,7 +124,7 @@ export function VideoPanel({ data, videoUrl }: VideoPanelProps) {
               <span className="section-label">{label}</span>
             </div>
             <div className="flex justify-between items-start gap-2">
-              <p className="text-xs text-foreground/85 leading-relaxed flex-1">{content || "Pending..."}</p>
+              <p className="text-xs text-foreground/85 leading-relaxed flex-1">{content || "—"}</p>
               <CopyButton text={content || ""} className="shrink-0" />
             </div>
           </motion.div>

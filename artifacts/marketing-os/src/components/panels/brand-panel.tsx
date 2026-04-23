@@ -17,20 +17,16 @@ export function BrandPanel({ data }: BrandPanelProps) {
     navigator.clipboard.writeText(hex).catch(() => {});
   };
 
-  if (!data) {
-    return (
-      <div className="p-8 text-center glass rounded-2xl border border-dashed border-border/60">
-        <p className="text-muted-foreground italic">Brand data is unavailable.</p>
-      </div>
-    );
+  if (!data || typeof data !== "object") {
+    return <div className="p-6 text-gray-500 glass rounded-2xl border border-dashed border-border/60">No brand data available</div>;
   }
 
-  const tagline = data.tagline || "Brand tagline pending.";
-  const brandArchetype = data.brandArchetype || "Modern Innovator";
-  const colorPalette = Array.isArray(data.colorPalette) ? data.colorPalette : [];
-  const brandVoice = data.brandVoice || "Clear and professional voice.";
-  const fontPairings = Array.isArray(data.fontPairings) ? data.fontPairings : [];
-  const moodboardKeywords = Array.isArray(data.moodboardKeywords) ? data.moodboardKeywords : [];
+  const tagline = data?.tagline || "—";
+  const brandArchetype = data?.brandArchetype || "Modern Innovator";
+  const colorPalette = Array.isArray(data?.colorPalette) ? data.colorPalette : [];
+  const brandVoice = data?.brandVoice || "—";
+  const fontPairings = Array.isArray(data?.fontPairings) ? data.fontPairings : [];
+  const moodboardKeywords = Array.isArray(data?.moodboardKeywords) ? data.moodboardKeywords : [];
 
   return (
     <motion.div variants={STAGGER.container} initial="hidden" animate="show" className="space-y-4">

@@ -29,21 +29,17 @@ const PLATFORMS = [
 export function StrategyPanel({ data }: StrategyPanelProps) {
   const [activeHook, setActiveHook] = useState(0);
 
-  if (!data) {
-    return (
-      <div className="p-8 text-center glass rounded-2xl border border-dashed border-border/60">
-        <p className="text-muted-foreground italic">Strategy data is unavailable.</p>
-      </div>
-    );
+  if (!data || typeof data !== "object") {
+    return <div className="p-6 text-gray-500 glass rounded-2xl border border-dashed border-border/60">No strategy data available</div>;
   }
 
-  const viralHooks = Array.isArray(data.viralHooks) ? data.viralHooks : [];
-  const sloganIdeas = Array.isArray(data.sloganIdeas) ? data.sloganIdeas : [];
-  const positioning = data.positioning || data.brandPositioning || "Positioning strategy not available.";
-  const keyMessage = data.keyMessage || "Core message pending.";
-  const audiencePsychology = data.audiencePsychology || data.coreStrategy || "Audience insights not available.";
-  const competitorAngle = data.competitorAngle || "Market competition analysis pending.";
-  const platformStrategy = data.platformStrategy || data.coreStrategy || "Platform rollout plan pending.";
+  const viralHooks = Array.isArray(data?.viralHooks) ? data.viralHooks : [];
+  const sloganIdeas = Array.isArray(data?.sloganIdeas) ? data.sloganIdeas : [];
+  const positioning = data?.positioning || data?.brandPositioning || "—";
+  const keyMessage = data?.keyMessage || "—";
+  const audiencePsychology = data?.audiencePsychology || data?.coreStrategy || "—";
+  const competitorAngle = data?.competitorAngle || "—";
+  const platformStrategy = data?.platformStrategy || data?.coreStrategy || "—";
 
   return (
     <motion.div variants={STAGGER.container} initial="hidden" animate="show" className="space-y-4">

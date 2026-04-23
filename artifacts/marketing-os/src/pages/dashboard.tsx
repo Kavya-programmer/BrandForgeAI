@@ -133,42 +133,36 @@ export default function Dashboard() {
       setLoadingMessage(LOADING_MESSAGES[type]);
 
       try {
-        let result: ApiResponse<CampaignResponse>;
+        let data: CampaignResponse | null = null;
         
         switch (type) {
-          case "campaign": {
-            result = await campaignMutation.mutateAsync({ data: payload }) as any;
+          case "campaign":
+            data = await campaignMutation.mutateAsync({ data: payload }) as any;
             break;
-          }
-          case "strategy": {
-            result = await strategyMutation.mutateAsync({ data: payload }) as any;
+          case "strategy":
+            data = await strategyMutation.mutateAsync({ data: payload }) as any;
             break;
-          }
-          case "video": {
-            result = await videoPlanMutation.mutateAsync({ data: payload }) as any;
+          case "video":
+            data = await videoPlanMutation.mutateAsync({ data: payload }) as any;
             break;
-          }
-          case "brand": {
-            result = await brandMutation.mutateAsync({ data: payload }) as any;
+          case "brand":
+            data = await brandMutation.mutateAsync({ data: payload }) as any;
             break;
-          }
-          case "influencer": {
-            result = await influencerMutation.mutateAsync({ data: payload }) as any;
+          case "influencer":
+            data = await influencerMutation.mutateAsync({ data: payload }) as any;
             break;
-          }
-          case "trends": {
-            result = await trendsMutation.mutateAsync({ data: payload }) as any;
+          case "trends":
+            data = await trendsMutation.mutateAsync({ data: payload }) as any;
             break;
-          }
           default:
             throw new Error(`Unknown type: ${type}`);
         }
 
-        if (result.error || !result.data) {
-          throw new Error(result.message || "Generation failed");
+        if (!data) {
+          throw new Error("Generation failed: No data returned from AI");
         }
 
-        setResults((prev) => ({ ...prev, [type]: result.data }));
+        setResults((prev) => ({ ...prev, [type]: data }));
         setActiveTab(type);
         toast({
           title: "Generated!",

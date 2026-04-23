@@ -367,5 +367,21 @@ export async function customFetch<T = unknown>(
     throw new ApiError(response, errorData, requestInfo);
   }
 
-  return (await parseSuccessBody(response, responseType, requestInfo)) as T;
+  const body = await parseSuccessBody(response, responseType, requestInfo);
+
+  // Handle standard ApiResponse wrapper { error, message, data }
+  if (body && typeof body === "object" && "error" in body) {
+    const apiResponse = body as { error: boolean; message: string; data?: any };
+    
+    if (apiResponse.error) {
+      throw new ApiError(response, body, requestInfo);
+    }
+    
+    // If data is present, unwrap it to match Orval types
+    if ("data" in apiResponse) {
+      return apiResponse.data as T;
+    }
+  }
+
+  return body as T;
 }

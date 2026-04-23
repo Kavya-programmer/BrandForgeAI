@@ -28,21 +28,17 @@ const PLATFORM_STYLES: Record<string, string> = {
 };
 
 export function InfluencerPanel({ data }: InfluencerPanelProps) {
-  if (!data) {
-    return (
-      <div className="p-8 text-center glass rounded-2xl border border-dashed border-border/60">
-        <p className="text-muted-foreground italic">Influencer data is unavailable.</p>
-      </div>
-    );
+  if (!data || typeof data !== "object") {
+    return <div className="p-6 text-gray-500 glass rounded-2xl border border-dashed border-border/60">No influencer data available</div>;
   }
 
-  const name = data.name || data.selectedInfluencerName || "Influencer Persona";
-  const handle = data.handle || `@${name.toLowerCase().replace(/\s/g, "")}`;
-  const collaborationIdeas = Array.isArray(data.collaborationIdeas) ? data.collaborationIdeas : [];
-  const contentPillars = Array.isArray(data.contentPillars) ? data.contentPillars : [];
-  const sampleCaptions = Array.isArray(data.sampleCaptions) ? data.sampleCaptions : [];
-  const platforms = Array.isArray(data.platforms) ? data.platforms : ["Instagram", "TikTok"];
-  const influencerTypes = Array.isArray(data.influencerTypes) ? data.influencerTypes : [];
+  const name = data?.name || data?.selectedInfluencerName || "Influencer Persona";
+  const handle = data?.handle || `@${name.toLowerCase().replace(/\s/g, "")}`;
+  const collaborationIdeas = Array.isArray(data?.collaborationIdeas) ? data.collaborationIdeas : [];
+  const contentPillars = Array.isArray(data?.contentPillars) ? data.contentPillars : [];
+  const sampleCaptions = Array.isArray(data?.sampleCaptions) ? data.sampleCaptions : [];
+  const platforms = Array.isArray(data?.platforms) ? data.platforms : ["Instagram", "TikTok"];
+  const influencerTypes = Array.isArray(data?.influencerTypes) ? data.influencerTypes : [];
 
   // Generate a consistent avatar background from name
   const avatarColors = ["from-violet-500 to-purple-600", "from-pink-500 to-rose-600", "from-emerald-500 to-teal-600", "from-amber-500 to-orange-600"];

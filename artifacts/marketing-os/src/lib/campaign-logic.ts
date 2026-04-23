@@ -24,18 +24,64 @@ export interface CampaignResponse {
   // Video specific
   scenes?: Array<{
     sceneNumber: number;
+    duration?: string;
     visual: string;
     audio: string;
+    cameraAngle?: string;
+    textOverlay?: string;
   }>;
+  musicStyle?: string;
+  editingStyle?: string;
+  captionsText?: string;
+  runwayPrompt?: string;
+  pikaPrompt?: string;
+  heygen_prompt?: string;
+  thumbnailPrompt?: string;
+  versions?: Record<string, string>;
 
   // Brand specific
+  tagline?: string;
   brandArchetype?: string;
   brandVoice?: string;
-  colorPalette?: string[];
+  colorPalette?: Array<{ name: string; hex: string }>;
+  fontPairings?: string[];
+  logoConceptDescription?: string;
+  aestheticDirection?: string;
+  moodboardKeywords?: string[];
 
   // Influencer specific
   selectedInfluencerName?: string;
   brandCollabAngle?: string;
+  handle?: string;
+  audienceSize?: string;
+  bio?: string;
+  location?: string;
+  age?: string;
+  aesthetic?: string;
+  platforms?: string[];
+  influencerTypes?: string[];
+  contentStyle?: string;
+  contentPillars?: string[];
+  collaborationIdeas?: string[];
+  sampleCaptions?: string[];
+  characterStory?: string;
+  viralityExplanation?: string;
+
+  // Trend specific
+  currentTrends?: Array<{
+    trend: string;
+    platform: string;
+    virality: string;
+    howToUse: string;
+  }>;
+  trendHooks?: string[];
+  adaptedCampaign?: string;
+  viralFormula?: string;
+  timingAdvice?: string;
+  hashtagStrategy?: string;
+  hashtags?: string[];
+  soundSuggestions?: string[];
+  trendInsights?: string[];
 }
 
 export interface ApiResponse<T = CampaignResponse> {
@@ -177,6 +223,15 @@ export function unifyResponse(data: any, brand: string, product: string, audienc
   const brandPositioning = data.brandPositioning || data.positioning || data.brandArchetype || "Premium market positioning";
   const influencerAngles = data.influencerAngles || data.brandCollabAngle || "Strategic creator partnership";
 
+  // Enforce Trend Hooks as array
+  let trendHooks = data.trendHooks;
+  if (typeof trendHooks === 'string') {
+    trendHooks = trendHooks.split('\n').filter(h => h.trim()).map(h => h.replace(/^\d+\.\s*/, '').trim());
+  }
+  if (!Array.isArray(trendHooks)) {
+    trendHooks = [];
+  }
+
   return {
     ...data, // Keep original fields for specialized panels
     campaignIdea,
@@ -187,6 +242,7 @@ export function unifyResponse(data: any, brand: string, product: string, audienc
     adScript,
     brandPositioning,
     influencerAngles,
+    trendHooks,
     viralityScore: score,
     estimatedViews: getEstimatedViews(score)
   };

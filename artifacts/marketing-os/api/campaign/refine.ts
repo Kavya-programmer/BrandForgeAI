@@ -26,9 +26,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const completion = await client.chat.completions.create({
         model: "llama-3.3-70b-versatile",
         messages: [
-          { role: "system", content: "You are an expert copy editor. Refine the provided content. Return ONLY valid JSON matching the full campaign schema." },
+          { role: "system", content: "You are an expert copy editor. Refine the provided content. Return ONLY valid JSON matching the full campaign schema. No placeholders like 'pending'." },
           { role: "assistant", content: typeof previousResponse === 'string' ? previousResponse : JSON.stringify(previousResponse) },
-          { role: "user", content: `Refine this content: ${refinement}. Return JSON with: campaignIdea, keyMessage, coreStrategy, socialContent, videoStoryboard, adScript, brandPositioning, influencerAngles.` }
+          { role: "user", content: `Refine this content based on this feedback: "${refinement}". Return the FULL campaign JSON with updated fields: campaignIdea, keyMessage, coreStrategy, socialContent, videoStoryboard, adScript, brandPositioning, influencerAngles.` }
         ],
         response_format: { type: "json_object" },
         temperature: 0.7,

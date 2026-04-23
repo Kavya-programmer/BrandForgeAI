@@ -128,7 +128,7 @@ export function CampaignForm({ onSubmit, isGenerating }: CampaignFormProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {themesData?.themes.map((theme) => (
+                  {themesData?.themes?.map((theme) => (
                     <SelectItem key={theme.id} value={theme.id} data-testid={`theme-option-${theme.id}`}>
                       {theme.label}
                     </SelectItem>
