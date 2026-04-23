@@ -104,12 +104,12 @@ export function VideoPanel({ data, videoUrl }: VideoPanelProps) {
                     <Camera className="w-3 h-3" /> {scene?.cameraAngle || "Medium Shot"}
                   </span>
                 </div>
-                <p className="text-sm text-foreground/90 leading-relaxed mb-1">{scene?.visual || "Visual description pending."}</p>
-                <p className="text-xs text-muted-foreground">{scene?.audio || "Audio cues pending."}</p>
+                <p className="text-sm text-foreground/90 leading-relaxed mb-1">{getString(scene?.visual) || "Visual description pending."}</p>
+                <p className="text-xs text-muted-foreground">{getString(scene?.audio) || "Audio cues pending."}</p>
                 {scene?.textOverlay && (
                   <div className="mt-1.5 inline-flex items-center gap-1 text-[11px] text-amber-400 bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded-md">
                     <Type className="w-3 h-3" />
-                    {scene.textOverlay}
+                    {getString(scene.textOverlay)}
                   </div>
                 )}
               </div>
@@ -212,7 +212,7 @@ export function VideoPanel({ data, videoUrl }: VideoPanelProps) {
                   </div>
                   <CopyButton text={content || ""} />
                 </div>
-                <p className="text-sm text-foreground/85 leading-relaxed">{content || "Platform-specific version pending."}</p>
+                <p className="text-sm text-foreground/85 leading-relaxed">{getString(content) || "Platform-specific version pending."}</p>
               </div>
             );
           })}

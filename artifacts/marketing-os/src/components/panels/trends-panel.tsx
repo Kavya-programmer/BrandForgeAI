@@ -86,7 +86,7 @@ export function TrendsPanel({ data }: TrendsPanelProps) {
                   </div>
                 </div>
                 <div className="px-4 py-3">
-                  <p className="text-xs text-foreground/80 leading-relaxed">{trend.howToUse || "Integration strategy pending."}</p>
+                  <p className="text-xs text-foreground/80 leading-relaxed">{getString(trend.howToUse) || "Integration strategy pending."}</p>
                 </div>
               </motion.div>
             );

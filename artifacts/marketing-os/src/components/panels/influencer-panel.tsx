@@ -125,7 +125,7 @@ export function InfluencerPanel({ data }: InfluencerPanelProps) {
           {/* Bio */}
           <div className="bg-secondary/60 rounded-xl p-3">
             <div className="flex justify-between items-start gap-2">
-              <p className="text-sm text-foreground/85 leading-relaxed flex-1 italic">&ldquo;{bio || "AI Influencer profile pending."}&rdquo;</p>
+              <p className="text-sm text-foreground/85 leading-relaxed flex-1 italic">&ldquo;{getString(bio) || "AI Influencer profile pending."}&rdquo;</p>
               <CopyButton text={bio} className="shrink-0" />
             </div>
           </div>
@@ -248,7 +248,7 @@ export function InfluencerPanel({ data }: InfluencerPanelProps) {
             <span className="section-label">Origin Story</span>
             <CopyButton text={data.characterStory} />
           </div>
-          <p className="text-sm text-foreground/85 leading-relaxed italic">&ldquo;{data.characterStory}&rdquo;</p>
+          <p className="text-sm text-foreground/85 leading-relaxed italic">&ldquo;{getString(data.characterStory)}&rdquo;</p>
         </motion.div>
       )}
 
