@@ -28,7 +28,8 @@ const PLATFORM_STYLES: Record<string, string> = {
 };
 
 export function InfluencerPanel({ data }: InfluencerPanelProps) {
-  if (!data || typeof data !== "object") {
+  if (!data) return null;
+  if (typeof data !== "object") {
     return <div className="p-6 text-gray-500 glass rounded-2xl border border-dashed border-border/60">No influencer data available</div>;
   }
 
@@ -77,7 +78,7 @@ export function InfluencerPanel({ data }: InfluencerPanelProps) {
               <p className="text-sm text-primary font-medium">{handle}</p>
             </div>
             <div className="ml-auto pb-1 text-right">
-              <p className="text-xl font-bold text-foreground">{data.audienceSize || "500K+"}</p>
+              <p className="text-xl font-bold text-foreground">{data?.audienceSize || "500K+"}</p>
               <p className="text-xs text-muted-foreground">Total Following</p>
             </div>
           </div>
@@ -243,9 +244,9 @@ export function InfluencerPanel({ data }: InfluencerPanelProps) {
       {/* Virality Score */}
       <motion.div variants={STAGGER.item}>
         <ViralityGauge
-          score={data.viralityScore || 75}
-          estimatedViews={data.estimatedViews || "500K-1M views"}
-          explanation={data.viralityExplanation || "Virality breakdown pending."}
+          score={data?.viralityScore || 75}
+          estimatedViews={data?.estimatedViews || "500K-1M views"}
+          explanation={data?.viralityExplanation || "Virality breakdown pending."}
         />
       </motion.div>
     </motion.div>

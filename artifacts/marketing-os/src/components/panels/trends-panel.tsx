@@ -29,7 +29,8 @@ const PLATFORM_BADGES: Record<string, string> = {
 };
 
 export function TrendsPanel({ data }: TrendsPanelProps) {
-  if (!data || typeof data !== "object") {
+  if (!data) return null;
+  if (typeof data !== "object") {
     return <div className="p-6 text-gray-500 glass rounded-2xl border border-dashed border-border/60">No trends data available</div>;
   }
 
@@ -131,16 +132,16 @@ export function TrendsPanel({ data }: TrendsPanelProps) {
           <motion.div variants={STAGGER.item} className="glass rounded-2xl border border-border/60 p-5">
             <div className="flex items-center justify-between mb-3">
               <span className="section-label">Viral Formula</span>
-              <CopyButton text={data.viralFormula || data.coreStrategy || ""} />
+              <CopyButton text={data?.viralFormula || data?.coreStrategy || ""} />
             </div>
-            <p className="text-sm text-foreground/85 leading-relaxed">{data.viralFormula || data.coreStrategy || "Viral formula not available."}</p>
+            <p className="text-sm text-foreground/85 leading-relaxed">{data?.viralFormula || data?.coreStrategy || "Viral formula not available."}</p>
           </motion.div>
           <motion.div variants={STAGGER.item} className="glass rounded-2xl border border-border/60 p-5">
             <div className="flex items-center justify-between mb-3">
               <span className="section-label">Timing Strategy</span>
-              <CopyButton text={data.timingAdvice || ""} />
+              <CopyButton text={data?.timingAdvice || ""} />
             </div>
-            <p className="text-sm text-foreground/85 leading-relaxed">{data.timingAdvice || "Optimal timing data pending."}</p>
+            <p className="text-sm text-foreground/85 leading-relaxed">{data?.timingAdvice || "Optimal timing data pending."}</p>
           </motion.div>
         </div>
       </div>
@@ -152,9 +153,9 @@ export function TrendsPanel({ data }: TrendsPanelProps) {
             <Hash className="w-4 h-4 text-cyan-400" />
             <span className="section-label">Hashtag Strategy</span>
           </div>
-          <CopyButton text={data.hashtagStrategy || ""} />
+          <CopyButton text={data?.hashtagStrategy || ""} />
         </div>
-        <p className="text-sm text-foreground/85 leading-relaxed mb-4">{data.hashtagStrategy || "Hashtag strategy pending."}</p>
+        <p className="text-sm text-foreground/85 leading-relaxed mb-4">{data?.hashtagStrategy || "Hashtag strategy pending."}</p>
         {/* Hashtag chips */}
         {Array.isArray(data.hashtags) && data.hashtags.length > 0 && (
           <div className="flex flex-wrap gap-2">
@@ -213,9 +214,9 @@ export function TrendsPanel({ data }: TrendsPanelProps) {
       {/* Virality Score */}
       <motion.div variants={STAGGER.item}>
         <ViralityGauge
-          score={data.viralityScore || 85}
-          estimatedViews={data.estimatedViews || "500K-1M views"}
-          explanation={data.viralityExplanation || "Virality breakdown pending."}
+          score={data?.viralityScore || 85}
+          estimatedViews={data?.estimatedViews || "500K-1M views"}
+          explanation={data?.viralityExplanation || "Virality breakdown pending."}
         />
       </motion.div>
     </motion.div>

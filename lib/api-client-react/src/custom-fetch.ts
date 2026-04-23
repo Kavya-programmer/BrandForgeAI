@@ -369,18 +369,18 @@ export async function customFetch<T = unknown>(
   const body = await parseSuccessBody(response, responseType, requestInfo);
 
   // Handle standard ApiResponse wrapper { error, message, data }
-  if (body !== null && typeof body === "object" && "error" in body) {
-    const apiResponse = body as { error: boolean; message: string; data?: any };
+  if (body !== null && typeof body === "object" && ("error" in body || "data" in body)) {
+    const json = body as { error?: boolean; message?: string; data?: any };
     
-    if (apiResponse.error) {
-      console.error("[customFetch] Logical API Error:", apiResponse.message);
-      throw new ApiError(response, body, requestInfo);
+    // Strict validation as per requirements: !json || json.error || !json.data
+    if (!json || json.error === true || !json.data) {
+      console.error("API ERROR: Invalid or Error Response", json);
+      const errorMessage = json.message || "Invalid API response structure";
+      throw new Error(`API ERROR: ${errorMessage}`);
     }
     
-    // If data is present, unwrap it to match Orval types
-    if ("data" in apiResponse) {
-      return apiResponse.data as T;
-    }
+    // Success: return unwrapped data
+    return json.data as T;
   }
 
   return body as T;

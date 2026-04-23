@@ -96,7 +96,8 @@ function TextCard({
 }
 
 export function CampaignPanel({ data }: CampaignPanelProps) {
-  if (!data || typeof data !== "object") {
+  if (!data) return null;
+  if (typeof data !== "object") {
     return <div className="p-6 text-gray-500 glass rounded-2xl border border-dashed border-border/60">No campaign data available</div>;
   }
 
@@ -155,15 +156,15 @@ export function CampaignPanel({ data }: CampaignPanelProps) {
         <Card icon={Target} title="Core Strategy" gradient="bg-gradient-to-br from-emerald-500 to-teal-600">
           <div className="flex justify-between items-start gap-3">
             <div className="space-y-2 flex-1">
-              {(data.coreStrategy || "").split("\n").filter(Boolean).map((line, i) => (
+              {(data?.coreStrategy || "").split("\n").filter(Boolean).map((line, i) => (
                 <div key={i} className="flex items-start gap-2 text-sm text-foreground/90">
                   <span className="text-emerald-400 mt-0.5 shrink-0">•</span>
                   <span className="leading-relaxed">{line.replace(/^[•\-\*]\s*/, "")}</span>
                 </div>
               ))}
-              {!data.coreStrategy && <p className="text-sm text-muted-foreground italic">No strategy details available.</p>}
+              {!data?.coreStrategy && <p className="text-sm text-muted-foreground italic">No strategy details available.</p>}
             </div>
-            <CopyButton text={data.coreStrategy || ""} className="shrink-0" />
+            <CopyButton text={data?.coreStrategy || ""} className="shrink-0" />
           </div>
         </Card>
 
@@ -230,19 +231,19 @@ export function CampaignPanel({ data }: CampaignPanelProps) {
           <div className="terminal-dot bg-yellow-500/80" />
           <div className="terminal-dot bg-green-500/80" />
           <span className="ml-2 text-[11px] text-muted-foreground flex-1">ad-script.txt</span>
-          <CopyButton text={data.adScript || ""} />
+          <CopyButton text={data?.adScript || ""} />
         </div>
         <div className="px-4 py-4">
-          <pre className="text-xs leading-relaxed text-emerald-300/80 whitespace-pre-wrap">{data.adScript || "Ad script pending generation."}</pre>
+          <pre className="text-xs leading-relaxed text-emerald-300/80 whitespace-pre-wrap">{data?.adScript || "Ad script pending generation."}</pre>
         </div>
       </motion.div>
 
       {/* Virality */}
       <motion.div variants={STAGGER.item}>
         <ViralityGauge
-          score={data.viralityScore || 70}
-          estimatedViews={data.estimatedViews || "100K-500K views"}
-          explanation={data.viralityExplanation || "No virality analysis available."}
+          score={data?.viralityScore || 70}
+          estimatedViews={data?.estimatedViews || "100K-500K views"}
+          explanation={data?.viralityExplanation || "No virality analysis available."}
         />
       </motion.div>
     </motion.div>

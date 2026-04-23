@@ -29,7 +29,8 @@ const PLATFORMS = [
 export function StrategyPanel({ data }: StrategyPanelProps) {
   const [activeHook, setActiveHook] = useState(0);
 
-  if (!data || typeof data !== "object") {
+  if (!data) return null;
+  if (typeof data !== "object") {
     return <div className="p-6 text-gray-500 glass rounded-2xl border border-dashed border-border/60">No strategy data available</div>;
   }
 
@@ -184,9 +185,9 @@ export function StrategyPanel({ data }: StrategyPanelProps) {
       {/* Virality Score */}
       <motion.div variants={STAGGER.item}>
         <ViralityGauge
-          score={data.viralityScore || 70}
-          estimatedViews={data.estimatedViews || "100K-500K views"}
-          explanation={data.viralityExplanation || "Virality breakdown pending."}
+          score={data?.viralityScore || 70}
+          estimatedViews={data?.estimatedViews || "100K-500K views"}
+          explanation={data?.viralityExplanation || "Virality breakdown pending."}
         />
       </motion.div>
     </motion.div>

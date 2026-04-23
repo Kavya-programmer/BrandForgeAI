@@ -34,7 +34,8 @@ const VERSION_LABELS = [
 export function VideoPanel({ data, videoUrl }: VideoPanelProps) {
   const [expandedTool, setExpandedTool] = useState<string | null>(null);
 
-  if (!data || typeof data !== "object") {
+  if (!data) return null;
+  if (typeof data !== "object") {
     return <div className="p-6 text-gray-500 glass rounded-2xl border border-dashed border-border/60">No video data available</div>;
   }
 
@@ -139,7 +140,7 @@ export function VideoPanel({ data, videoUrl }: VideoPanelProps) {
         </div>
         <div className="divide-y divide-border/40">
           {AI_TOOLS.map((tool) => {
-            const content = data[tool.key as keyof VideoPlanResult] as string;
+            const content = data?.[tool.key as keyof VideoPlanResult] as string;
             const isOpen = expandedTool === tool.key;
             return (
               <div key={tool.key}>
@@ -193,7 +194,7 @@ export function VideoPanel({ data, videoUrl }: VideoPanelProps) {
         </div>
         <div className="divide-y divide-border/40">
           {VERSION_LABELS.map(({ key, label, gradient }) => {
-            const v = (data.versions || {}) as Record<string, string>;
+            const v = (data?.versions || {}) as Record<string, string>;
             const content = v[key];
             return (
               <div key={key} className="px-5 py-4">

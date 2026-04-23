@@ -17,7 +17,8 @@ export function BrandPanel({ data }: BrandPanelProps) {
     navigator.clipboard.writeText(hex).catch(() => {});
   };
 
-  if (!data || typeof data !== "object") {
+  if (!data) return null;
+  if (typeof data !== "object") {
     return <div className="p-6 text-gray-500 glass rounded-2xl border border-dashed border-border/60">No brand data available</div>;
   }
 
@@ -155,16 +156,16 @@ export function BrandPanel({ data }: BrandPanelProps) {
         <motion.div variants={STAGGER.item} className="glass rounded-2xl border border-border/60 p-5">
           <div className="flex items-center justify-between mb-3">
             <span className="section-label">Logo Concept</span>
-            <CopyButton text={data.logoConceptDescription || "Logo concept pending."} />
+            <CopyButton text={data?.logoConceptDescription || "Logo concept pending."} />
           </div>
-          <p className="text-sm text-foreground/85 leading-relaxed">{data.logoConceptDescription || "Logo concept pending."}</p>
+          <p className="text-sm text-foreground/85 leading-relaxed">{data?.logoConceptDescription || "Logo concept pending."}</p>
         </motion.div>
         <motion.div variants={STAGGER.item} className="glass rounded-2xl border border-border/60 p-5">
           <div className="flex items-center justify-between mb-3">
             <span className="section-label">Visual Direction</span>
-            <CopyButton text={data.aestheticDirection || "Visual direction pending."} />
+            <CopyButton text={data?.aestheticDirection || "Visual direction pending."} />
           </div>
-          <p className="text-sm text-foreground/85 leading-relaxed">{data.aestheticDirection || "Visual direction pending."}</p>
+          <p className="text-sm text-foreground/85 leading-relaxed">{data?.aestheticDirection || "Visual direction pending."}</p>
         </motion.div>
       </div>
 
