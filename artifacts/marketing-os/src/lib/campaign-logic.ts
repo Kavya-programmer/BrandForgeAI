@@ -15,11 +15,19 @@ export interface CampaignResponse {
 
   // Strategy specific
   positioning?: string;
-  audiencePsychology?: string;
+  audiencePsychology?: {
+    emotionalTriggers: string;
+    logicalTriggers: string;
+  } | string;
   viralHooks?: string[];
   sloganIdeas?: string[];
   competitorAngle?: string;
-  platformStrategy?: string;
+  platformStrategy?: {
+    tiktok: string;
+    instagram: string;
+    youtube: string;
+    linkedin: string;
+  } | string;
 
   // Video specific
   scenes?: Array<{
@@ -130,10 +138,18 @@ export function getThemeLabel(id: string): string {
 
 /* ---------------- SAFE PARSER ---------------- */
 
-function safeParse(raw: string) {
+export function safeParse(raw: string) {
   try {
     // Basic cleanup in case AI includes markdown markers
-    const jsonStr = raw.replace(/^```json\n?/, "").replace(/\n?```$/, "").trim();
+    let jsonStr = raw.replace(/^```json\n?/, "").replace(/\n?```$/, "").trim();
+    
+    // Find first { and last } to handle cases where AI adds text outside the JSON
+    const firstBrace = jsonStr.indexOf("{");
+    const lastBrace = jsonStr.lastIndexOf("}");
+    if (firstBrace !== -1 && lastBrace !== -1) {
+      jsonStr = jsonStr.substring(firstBrace, lastBrace + 1);
+    }
+    
     return JSON.parse(jsonStr);
   } catch {
     console.error("❌ INVALID JSON:", raw);
@@ -158,7 +174,7 @@ export async function callGroqJSON<T>(
         messages: [
           {
             role: "system",
-            content: systemPrompt + "\nCRITICAL: Return ONLY valid JSON. No conversational text. No explanations."
+            content: systemPrompt + "\nCRITICAL: Return ONLY a valid JSON object. Do NOT include headings, markdown, or any text outside the JSON. Ensure fields are strictly strings or arrays as defined."
           },
           { role: "user", content: userPrompt }
         ],
@@ -168,6 +184,7 @@ export async function callGroqJSON<T>(
       });
 
       const raw = res.choices[0]?.message?.content || "";
+      console.log("[GROQ RAW RESPONSE]:", raw);
       const parsed = safeParse(raw);
       if (parsed) return parsed as T;
     } catch (err) {
@@ -201,6 +218,13 @@ export function getEstimatedViews(score: number): string {
 
 export function normalizeBulletPoints(v: any): string {
   if (Array.isArray(v)) return v.map(i => `• ${String(i).trim()}`).join("\n");
+  
+  if (v && typeof v === "object") {
+    return Object.entries(v)
+      .map(([key, val]) => `• ${key.charAt(0).toUpperCase() + key.slice(1)}: ${val}`)
+      .join("\n");
+  }
+
   if (typeof v === "string" && v.trim()) {
     if (v.includes("•")) return v;
     return v.split("\n").filter(Boolean).map(l => `• ${l.trim()}`).join("\n");

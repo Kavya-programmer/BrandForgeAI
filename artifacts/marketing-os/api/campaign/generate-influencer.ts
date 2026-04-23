@@ -21,7 +21,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const themeLabel = getThemeLabel(theme);
     const client = getGroqClient();
 
-    const systemPrompt = "You are an influencer marketing specialist. Return ONLY valid JSON. Every field is MANDATORY. No placeholders.";
+    const systemPrompt = "You are an influencer marketing specialist. Return ONLY a valid JSON object. No conversational text. No markdown. No headings outside the JSON object.";
     const userPrompt = `Select and develop an influencer persona for:
 Brand: ${brand}
 Product: ${product}
@@ -30,25 +30,30 @@ Theme: ${themeLabel}
 
 Available curated influencers: ${JSON.stringify(CURATED_INFLUENCERS)}
 
-You MUST return these fields in JSON:
-1. selectedInfluencerName (Full name)
-2. handle (Social media handle)
-3. audienceSize (e.g., '1.2M')
-4. bio (Influencer bio)
-5. location (City/Country)
-6. age (e.g., '24-28')
-7. aesthetic (Visual style, e.g., 'Minimalist High-End')
-8. platforms (Array of platforms, e.g., ['Instagram', 'TikTok'])
-9. influencerTypes (Array of types, e.g., ['Tech Reviewer', 'Lifestyle'])
-10. contentStyle (Description of their content)
-11. contentPillars (Array of 3 pillars)
-12. brandCollabAngle (Why this brand fits them)
-13. collaborationIdeas (Array of 3 specific post ideas)
-14. sampleCaptions (Array of 2 captions)
-15. characterStory (Deep background story for this persona)
-16. viralityExplanation (Why they will drive views)
+You MUST return exactly this JSON structure:
+{
+  "selectedInfluencerName": "Full name",
+  "handle": "Social media handle",
+  "audienceSize": "e.g., 1.2M",
+  "bio": "Influencer bio description",
+  "location": "City/Country",
+  "age": "e.g., 24-28",
+  "aesthetic": "Visual style description",
+  "platforms": ["Instagram", "TikTok"],
+  "influencerTypes": ["Type 1", "Type 2"],
+  "contentStyle": "Description of their content approach",
+  "contentPillars": ["Pillar 1", "Pillar 2", "Pillar 3"],
+  "brandCollabAngle": "Why this brand fits them",
+  "collaborationIdeas": ["Idea 1", "Idea 2", "Idea 3"],
+  "sampleCaptions": ["Caption 1", "Caption 2"],
+  "characterStory": "Deep background story for this persona",
+  "viralityExplanation": "Why they will drive views"
+}
 
-CRITICAL: NO 'pending' or 'TBD'. Every field must be a detailed string or populated array.`;
+CRITICAL RULES:
+1. Output MUST be valid JSON only.
+2. Do NOT include headings or text outside the JSON.
+3. All content must be production-ready.`;
 
     let data = await callGroqJSON<any>(client, systemPrompt, userPrompt);
 

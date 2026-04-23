@@ -51,6 +51,21 @@ function getThemeLabel(id: string): string {
 }
 
 // ─── Strict JSON call — forces model to output valid JSON every time ──────────
+function safeParse(raw: string) {
+  try {
+    let jsonStr = raw.replace(/^```json\n?/, "").replace(/\n?```$/, "").trim();
+    const firstBrace = jsonStr.indexOf("{");
+    const lastBrace = jsonStr.lastIndexOf("}");
+    if (firstBrace !== -1 && lastBrace !== -1) {
+      jsonStr = jsonStr.substring(firstBrace, lastBrace + 1);
+    }
+    return JSON.parse(jsonStr);
+  } catch {
+    console.error("❌ INVALID JSON:", raw);
+    return null;
+  }
+}
+
 async function callGroqJSON<T = Record<string, unknown>>(
   client: Groq | null,
   systemPrompt: string,
@@ -62,7 +77,7 @@ async function callGroqJSON<T = Record<string, unknown>>(
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const completion = await client.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
+        model: "llama-3.1-8b-instant",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
@@ -72,8 +87,12 @@ async function callGroqJSON<T = Record<string, unknown>>(
         max_tokens: 3500,
       });
       const raw = completion.choices[0]?.message?.content ?? "";
+      console.log("[GROQ RAW RESPONSE]:", raw);
       if (!raw.trim()) throw new Error("Empty response");
-      return JSON.parse(raw) as T;
+      const parsed = safeParse(raw);
+      if (!parsed) throw new Error("Parse failed");
+      console.log("[PARSED JSON]:", JSON.stringify(parsed, null, 2));
+      return parsed as T;
     } catch (err) {
       lastError = err;
       if (attempt < maxRetries) await new Promise((r) => setTimeout(r, attempt * 1200));
@@ -327,13 +346,21 @@ Campaign Theme: ${themeLabel}
 
 Respond with ONLY this JSON structure (all fields required, no null values):
 {
-  "positioning": "How this brand should position itself in the market. 3-4 sentences covering what makes it uniquely ownable and differentiated.",
-  "audiencePsychology": "Deep dive into what makes this audience tick. Include their fears, desires, aspirations, decision triggers, and emotional hot buttons. Write as flowing paragraph.",
-  "keyMessage": "The single most important message this brand must communicate. One powerful sentence.",
-  "viralHooks": ["Hook 1 that stops scrolling", "Hook 2 with emotional angle", "Hook 3 with curiosity gap", "Hook 4 with controversy", "Hook 5 with aspiration"],
-  "sloganIdeas": ["Slogan 1", "Slogan 2", "Slogan 3", "Slogan 4", "Slogan 5"],
-  "platformStrategy": "Specific tactics for TikTok, Instagram, YouTube, and LinkedIn. What to post, when, how often, what format, and what CTA to use on each platform. Write as flowing paragraph.",
-  "competitorAngle": "How to differentiate from competitors. What unique territory to own. Include 3 specific differentiation tactics. Write as flowing paragraph."
+  "positioning": "string",
+  "audiencePsychology": {
+    "emotionalTriggers": "What makes them feel something",
+    "logicalTriggers": "What makes sense to them"
+  },
+  "keyMessage": "string",
+  "viralHooks": ["string"],
+  "sloganIdeas": ["string"],
+  "platformStrategy": {
+    "tiktok": "Strategy for TikTok",
+    "instagram": "Strategy for Instagram",
+    "youtube": "Strategy for YouTube",
+    "linkedin": "Strategy for LinkedIn"
+  },
+  "competitorAngle": "string"
 }`
     );
 
@@ -358,27 +385,27 @@ Respond with ONLY this JSON structure (all fields required, no null values):
     req.log.warn({ err }, "Groq API failed or key missing, using dynamic fallback for strategy generation");
     
     const fallbackResult = {
-      positioning: `${brand} owns the intersection of innovation and reliability in the ${product} space.`,
-      audiencePsychology: `${audience} desires authenticity and performance. They fear missing out on the next big thing in ${product}.`,
-      keyMessage: `Empower your lifestyle with ${brand}'s revolutionary ${product}.`,
+      positioning: `[FALLBACK] ${brand} owns the intersection of innovation and reliability in the ${product} space.`,
+      audiencePsychology: `[FALLBACK] ${audience} desires authenticity and performance. They fear missing out on the next big thing in ${product}.`,
+      keyMessage: `[FALLBACK] Empower your lifestyle with ${brand}'s revolutionary ${product}.`,
       viralHooks: [
-        `The truth about ${product} that nobody tells you...`,
-        `Why ${audience} are switching to ${brand}`,
-        `A day in the life with the ultimate ${product}`,
-        `Stop making this mistake with your ${product}`,
-        `The ${themeLabel} secret to better ${product}`
+        `[FALLBACK] The truth about ${product} that nobody tells you...`,
+        `[FALLBACK] Why ${audience} are switching to ${brand}`,
+        `[FALLBACK] A day in the life with the ultimate ${product}`,
+        `[FALLBACK] Stop making this mistake with your ${product}`,
+        `[FALLBACK] The ${themeLabel} secret to better ${product}`
       ],
       sloganIdeas: [
-        `${brand}: Beyond ${product}`,
-        `Your life, enhanced by ${brand}`,
-        `The future of ${product} is here`,
-        `${brand} - Made for ${audience}`,
-        `Experience true ${product}`
+        `[FALLBACK] ${brand}: Beyond ${product}`,
+        `[FALLBACK] Your life, enhanced by ${brand}`,
+        `[FALLBACK] The future of ${product} is here`,
+        `[FALLBACK] ${brand} - Made for ${audience}`,
+        `[FALLBACK] Experience true ${product}`
       ],
-      platformStrategy: `TikTok for viral reach using ${themeLabel} trends, Instagram for premium aesthetic, YouTube for deep-dive product reviews of ${product}.`,
-      competitorAngle: `Unlike competitors, ${brand} focuses entirely on the specific needs of ${audience} with a ${themeLabel} approach.`,
+      platformStrategy: `[FALLBACK] TikTok for viral reach using ${themeLabel} trends, Instagram for premium aesthetic, YouTube for deep-dive product reviews of ${product}.`,
+      competitorAngle: `[FALLBACK] Unlike competitors, ${brand} focuses entirely on the specific needs of ${audience} with a ${themeLabel} approach.`,
       viralityScore: 88,
-      viralityExplanation: `Based on hook strength and platform fit for ${themeLabel}, this strategy scores 88/100.`,
+      viralityExplanation: `[FALLBACK] Based on hook strength and platform fit for ${themeLabel}, this strategy scores 88/100.`,
       estimatedViews: "1M–5M views likely",
     };
     

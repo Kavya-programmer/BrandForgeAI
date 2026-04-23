@@ -27,6 +27,7 @@ const PLATFORMS = [
 ];
 
 export function StrategyPanel({ data }: StrategyPanelProps) {
+  console.log("[DATA RECEIVED IN STRATEGY-PANEL]:", data);
   const [activeHook, setActiveHook] = useState(0);
 
   if (!data) return null;
@@ -83,14 +84,28 @@ export function StrategyPanel({ data }: StrategyPanelProps) {
 
       {/* Audience Psychology */}
       <motion.div variants={STAGGER.item} className="glass rounded-2xl border border-border/60 px-6 py-5">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Brain className="w-4 h-4 text-violet-400" />
             <span className="section-label">Audience Psychology</span>
           </div>
           <CopyButton text={audiencePsychology} />
         </div>
-        <p className="text-sm text-foreground/85 leading-relaxed">{audiencePsychology}</p>
+        
+        {typeof data?.audiencePsychology === 'object' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <span className="text-[10px] uppercase tracking-wider text-violet-400/70 font-bold">Emotional Triggers</span>
+              <p className="text-sm text-foreground/85 leading-relaxed">{data.audiencePsychology.emotionalTriggers}</p>
+            </div>
+            <div className="space-y-1.5">
+              <span className="text-[10px] uppercase tracking-wider text-violet-400/70 font-bold">Logical Triggers</span>
+              <p className="text-sm text-foreground/85 leading-relaxed">{data.audiencePsychology.logicalTriggers}</p>
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm text-foreground/85 leading-relaxed">{audiencePsychology}</p>
+        )}
       </motion.div>
 
       {/* Viral Hooks — interactive flashcards */}
@@ -186,8 +201,25 @@ export function StrategyPanel({ data }: StrategyPanelProps) {
             </div>
           ))}
         </div>
-        <div className="px-5 pb-5 pt-3">
-          <p className="text-sm text-foreground/85 leading-relaxed">{platformStrategy}</p>
+        <div className="px-5 pb-5 pt-4">
+          {typeof data?.platformStrategy === 'object' ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+              {PLATFORMS.map((p) => (
+                <div key={p.id} className="space-y-1">
+                  <span className={cn("text-[10px] font-bold uppercase tracking-wider", 
+                    p.id === 'tiktok' ? 'text-gray-400' : 
+                    p.id === 'instagram' ? 'text-pink-400' : 
+                    p.id === 'youtube' ? 'text-red-400' : 'text-blue-400'
+                  )}>{p.label}</span>
+                  <p className="text-xs text-foreground/85 leading-relaxed">
+                    {(data.platformStrategy as any)[p.id] || "Strategy pending..."}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-foreground/85 leading-relaxed">{platformStrategy}</p>
+          )}
         </div>
       </motion.div>
 

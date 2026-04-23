@@ -20,24 +20,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const themeLabel = getThemeLabel(theme);
     const client = getGroqClient();
 
-    const systemPrompt = "You are an expert brand identity designer. Return ONLY valid JSON. Every field is MANDATORY. No placeholders.";
+    const systemPrompt = "You are an expert brand identity designer. Return ONLY a valid JSON object. No conversational text. No markdown. No headings outside the JSON object.";
     const userPrompt = `Create a detailed brand identity for:
 Brand: ${brand}
 Product: ${product}
 Audience: ${audience}
 Theme: ${themeLabel}
 
-You MUST return these fields in JSON:
-1. tagline (Catchy 3-5 word tagline)
-2. brandArchetype (e.g., The Hero, The Outlaw)
-3. colorPalette (Array of 3-5 objects with 'name' and 'hex' keys)
-4. brandVoice (Description of how the brand speaks)
-5. fontPairings (Array of 2 strings: 'Heading: Name', 'Body: Name')
-6. logoConceptDescription (Detailed visual description of a logo)
-7. aestheticDirection (Overall visual style, e.g., 'Minimalist Brutalism')
-8. moodboardKeywords (Array of 5 descriptive keywords)
+You MUST return exactly this JSON structure:
+{
+  "tagline": "Catchy 3-5 word tagline",
+  "brandArchetype": "e.g., The Hero, The Outlaw",
+  "colorPalette": [
+    {"name": "Color 1", "hex": "#HEX"},
+    {"name": "Color 2", "hex": "#HEX"},
+    {"name": "Color 3", "hex": "#HEX"}
+  ],
+  "brandVoice": "Description of how the brand speaks",
+  "fontPairings": ["Heading: Name", "Body: Name"],
+  "logoConceptDescription": "Detailed visual description of a logo",
+  "aestheticDirection": "Overall visual style description",
+  "moodboardKeywords": ["Keyword 1", "Keyword 2", "Keyword 3", "Keyword 4", "Keyword 5"]
+}
 
-CRITICAL: NO 'pending' or 'TBD'. Every field must be production-ready content.`;
+CRITICAL RULES:
+1. Output MUST be valid JSON only.
+2. Do NOT include headings or text outside the JSON.
+3. All content must be production-ready.`;
 
     let data = await callGroqJSON<any>(client, systemPrompt, userPrompt);
 

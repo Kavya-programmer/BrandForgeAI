@@ -20,26 +20,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const themeLabel = getThemeLabel(theme);
     const client = getGroqClient();
 
-    const systemPrompt = "You are a world-class marketing strategist. You MUST return ONLY a complete JSON object. Every field is MANDATORY. Do NOT use placeholders like 'pending' or 'TBD'.";
+    const systemPrompt = "You are a world-class marketing strategist. Return ONLY a valid JSON object. No conversational text. No markdown. No headings outside the JSON object.";
     const userPrompt = `Create a comprehensive marketing campaign for:
 Brand: ${brand}
 Product: ${product}
 Target Audience: ${audience}
 Campaign Theme: ${themeLabel}
 
-You MUST return exactly these fields in valid JSON:
-1. campaignIdea (Creative concept)
-2. keyMessage (Main takeaway)
-3. coreStrategy (At least 3 bullet points)
-4. socialContent (Platform rollout overview)
-5. videoStoryboard (Narrative flow)
-6. adScript (Short form video script)
-7. brandPositioning (Market stance)
-8. influencerAngles (How creators should pitch it)
-9. competitorAngle (Specific edge over rivals)
-10. viralHooks (Array of 3 catchy hooks)
+You MUST return exactly this JSON structure:
+{
+  "campaignIdea": "Creative concept description",
+  "keyMessage": "Main takeaway / tagline",
+  "coreStrategy": "3-5 high-impact bullet points",
+  "socialContent": "Platform rollout overview",
+  "videoStoryboard": "Narrative flow description",
+  "adScript": "Short form video script",
+  "brandPositioning": "Market stance description",
+  "influencerAngles": "How creators should pitch it",
+  "competitorAngle": "Specific edge over rivals",
+  "viralHooks": ["Hook 1", "Hook 2", "Hook 3"]
+}
 
-CRITICAL: All fields must be fully written marketing copy. No 'pending' or 'not available'.`;
+CRITICAL RULES:
+1. Output MUST be valid JSON only.
+2. Do NOT include headings or text outside the JSON.
+3. All content must be production-ready.`;
 
     let data = await callGroqJSON<any>(client, systemPrompt, userPrompt);
 

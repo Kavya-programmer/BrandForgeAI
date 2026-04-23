@@ -21,30 +21,41 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const themeLabel = getThemeLabel(theme);
     const client = getGroqClient();
 
-    const systemPrompt = "You are a world-class brand strategist. Return ONLY valid JSON. Every field is MANDATORY. No placeholders.";
-    const userPrompt = `Develop a deep marketing strategy for:
+    const systemPrompt = "You are a world-class brand strategist. Your ONLY task is to return a valid JSON object. Do NOT include any conversational text, markdown, or headings outside the JSON. No headings like 'Audience Psychology', 'Copy', or 'Platform Strategy'.";
+    const userPrompt = `Develop a strategic marketing plan for:
 Brand: ${brand}
 Product: ${product}
 Target Audience: ${audience}
 Theme: ${themeLabel}
 
-You MUST return these fields in JSON:
-1. positioning (Detailed brand stance)
-2. keyMessage (Primary campaign tagline)
-3. audiencePsychology (Emotional and logical triggers)
-4. viralHooks (Array of 5 high-impact hooks)
-5. sloganIdeas (Array of 5 catchy slogans)
-6. competitorAngle (Strategic advantage over competitors)
-7. platformStrategy (How to win on TikTok, IG, and LinkedIn)
+You MUST return EXACTLY this JSON structure, with NO additional text:
+{
+  "audiencePsychology": {
+    "emotionalTriggers": "Concise list of emotional drivers",
+    "logicalTriggers": "Concise list of rational reasons"
+  },
+  "platformStrategy": {
+    "tiktok": "1-2 strategic sentences",
+    "instagram": "1-2 strategic sentences",
+    "youtube": "1-2 strategic sentences",
+    "linkedin": "1-2 strategic sentences"
+  }
+}
 
-CRITICAL: NO 'pending' or 'placeholder' text. All fields must contain actionable marketing intelligence.`;
+CRITICAL RULES:
+1. Output MUST be valid JSON only.
+2. NO text outside the JSON.
+3. NO headings or markdown.
+4. Platform fields MUST be 1-2 concise sentences (no bullet points).`;
 
     let data = await callGroqJSON<any>(client, systemPrompt, userPrompt);
+    console.log("[DEBUG] Parsed JSON Data:", data);
 
     // Validation
-    if (data && (data.competitorAngle === "pending" || !data.competitorAngle || !Array.isArray(data.viralHooks))) {
-      console.log("Missing strategy fields, retrying...");
-      data = await callGroqJSON<any>(client, systemPrompt, userPrompt + "\nRETRY: Ensure competitorAngle is a detailed paragraph and viralHooks is a full array.");
+    if (data && (!data.audiencePsychology || !data.platformStrategy || !data.platformStrategy.tiktok)) {
+      console.log("Missing required strategy fields, retrying...");
+      data = await callGroqJSON<any>(client, systemPrompt, userPrompt + "\nRETRY: Ensure all fields in the JSON structure are fully populated with high-quality strategic insights.");
+      console.log("[DEBUG] Retried Parsed JSON Data:", data);
     }
 
     if (!data) {

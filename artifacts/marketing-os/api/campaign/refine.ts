@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getGroqClient, unifyResponse } from "../../src/lib/campaign-logic.js";
+import { getGroqClient, unifyResponse, safeParse } from "../../src/lib/campaign-logic.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -36,7 +36,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
 
       const raw = completion.choices[0]?.message?.content ?? "{}";
-      const data = JSON.parse(raw);
+      const data = safeParse(raw);
 
       return res.status(200).json({
         error: false,

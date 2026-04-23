@@ -20,25 +20,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const themeLabel = getThemeLabel(theme);
     const client = getGroqClient();
 
-    const systemPrompt = "You are a viral marketing expert and trend analyst. Return ONLY valid JSON. Every field is MANDATORY. No placeholders.";
+    const systemPrompt = "You are a viral marketing expert and trend analyst. Return ONLY a valid JSON object. No conversational text. No markdown. No headings outside the JSON object.";
     const userPrompt = `Create a trend-jacking campaign for:
 Brand: ${brand}
 Product: ${product}
 Audience: ${audience}
 Theme: ${themeLabel}
 
-You MUST return these fields in JSON:
-1. currentTrends (Array of 2 objects with 'trend', 'platform', 'virality', 'howToUse')
-2. trendHooks (Array of 3-5 catchy hooks related to the trends)
-3. adaptedCampaign (Description of how to pivot the campaign for these trends)
-4. viralFormula (The 'secret sauce' for this campaign to go viral)
-5. timingAdvice (Best time/day to post for maximum impact)
-6. hashtagStrategy (Description of the hashtag approach)
-7. hashtags (Array of 5-10 specific hashtags)
-8. soundSuggestions (Array of 3 trending audio ideas)
-9. trendInsights (Array of 3 deep platform-specific insights)
+You MUST return exactly this JSON structure:
+{
+  "currentTrends": [
+    {"trend": "Trend 1", "platform": "Platform", "virality": "High", "howToUse": "Strategy"},
+    {"trend": "Trend 2", "platform": "Platform", "virality": "High", "howToUse": "Strategy"}
+  ],
+  "trendHooks": ["Hook 1", "Hook 2", "Hook 3", "Hook 4", "Hook 5"],
+  "adaptedCampaign": "Description of how to pivot the campaign",
+  "viralFormula": "The 'secret sauce' description",
+  "timingAdvice": "Best time/day to post advice",
+  "hashtagStrategy": "Description of the hashtag approach",
+  "hashtags": ["#Tag1", "#Tag2", "#Tag3"],
+  "soundSuggestions": ["Audio 1", "Audio 2", "Audio 3"],
+  "trendInsights": ["Insight 1", "Insight 2", "Insight 3"]
+}
 
-CRITICAL: NO 'pending' or 'TBD'. Trend Hooks MUST be an array of strings.`;
+CRITICAL RULES:
+1. Output MUST be valid JSON only.
+2. Do NOT include headings or text outside the JSON.
+3. All content must be production-ready.`;
 
     let data = await callGroqJSON<any>(client, systemPrompt, userPrompt);
 
