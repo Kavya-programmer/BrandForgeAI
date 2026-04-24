@@ -54,18 +54,18 @@ const wrapHandler = (handler, name) => async (req, res) => {
 };
 
 function getMockDataRaw(name, body) {
-  const { brand = "Nike", product = "shoes", audience = "teens" } = body || {};
+  const { brand = "Generic Brand", product = "Premium Product", audience = "Target Audience" } = body || {};
   
   const common = {
-    campaignIdea: `${brand} ${product.charAt(0).toUpperCase() + product.slice(1)}: Unleash Your Potential`,
-    keyMessage: `Built for the next generation of ${audience}.`,
-    coreStrategy: "• High-energy visual storytelling\n• Social-first viral challenges\n• Community-led brand advocacy",
-    socialContent: "Level up your game. #NikeSport #NextGen",
-    videoStoryboard: "Fast cuts of high-intensity sports action.",
-    adScript: "You don't wait for the future. You build it.",
-    brandPositioning: "The ultimate performance brand for modern athletes.",
-    influencerAngles: "Partnering with rising stars and local icons.",
-    competitorAngle: "Unlike competitors who focus on legacy, we emphasize the explosive energy of the next generation through raw, unfiltered content."
+    campaignIdea: `${brand} ${product.charAt(0).toUpperCase() + product.slice(1)}: The New Standard`,
+    keyMessage: `Revolutionizing the way ${audience} experience ${product}.`,
+    coreStrategy: "• High-impact digital storytelling\n• Strategic platform-specific rollout\n• Community-driven engagement loops",
+    socialContent: `Elevate your lifestyle with ${brand}. #Innovation #NextGen`,
+    videoStoryboard: `Cinematic sequences showing the real-world impact of ${product} on ${audience}.`,
+    adScript: "The future doesn't just happen. You create it.",
+    brandPositioning: `The leading ${product} choice for the modern ${audience}.`,
+    influencerAngles: "Highlighting authentic usage and transformation stories.",
+    competitorAngle: `While others focus on tradition, ${brand} pushes boundaries to deliver unmatched value to ${audience}.`
   };
 
   switch (name) {
@@ -73,68 +73,68 @@ function getMockDataRaw(name, body) {
     case 'generate-strategy': return { 
       ...common, 
       positioning: common.brandPositioning, 
-      audiencePsychology: "Driven by achievement and status, they seek brands that validate their hustle and individuality.", 
-      viralHooks: ["The Secret to 10x Performance", "Stop Waiting for Permission", "Why Elite Athletes are Switching"], 
-      sloganIdeas: ["Just Built Different", "Run Your Own Race", "Future of Speed"],
-      platformStrategy: "TikTok: High-intensity transition videos. Instagram: Cinematic lifestyle reels. LinkedIn: Thought leadership on performance engineering."
+      audiencePsychology: `Driven by quality and efficiency, ${audience} seek solutions that simplify their lives and provide status.`, 
+      viralHooks: [`The Secret to ${product} Mastery`, `Stop Settling for Less`, `Why ${audience} are Switching to ${brand}`], 
+      sloganIdeas: [`Simply Better`, `The ${brand} Way`, `Future of ${product}`],
+      platformStrategy: "TikTok: High-energy transitions. Instagram: Cinematic lifestyle reels. LinkedIn: Industry-leading insights."
     };
     case 'generate-influencer': return { 
       ...common, 
-      selectedInfluencerName: "Alex Rivers", 
-      handle: "@arivers", 
-      audienceSize: "2.4M", 
-      bio: "Tech & Lifestyle visionary helping the next generation optimize their performance.", 
-      location: "Los Angeles, CA",
-      age: "22-26",
-      aesthetic: "Cyber-Athletic / Neo-Noir",
-      collaborationIdeas: ["Behind the scenes training with Nike Proto-X", "Day in the life of a high-performance athlete", "Custom Nike DIY modification challenge"], 
-      sampleCaptions: ["The grind never stops. We built this for the ones who never sleep.", "Ready for anything. The future is active."],
-      characterStory: "Alex started as a local track star who documented their recovery using high-tech gear, eventually becoming the global face of tech-infused athletics.",
-      viralityExplanation: "Alex has a 12% engagement rate with teens, specifically in the high-energy sports niche."
+      selectedInfluencerName: "Taylor Morgan", 
+      handle: "@taylor_innovates", 
+      audienceSize: "1.2M", 
+      bio: `Niche expert and lifestyle influencer focused on ${product} and innovation.`, 
+      location: "Global",
+      age: "25-34",
+      aesthetic: "Modern / Minimalist / Professional",
+      collaborationIdeas: [`Unboxing and first impressions of ${product}`, `A day in the life powered by ${brand}`, `${product} stress test challenge`], 
+      sampleCaptions: [`The search is over. Finally a ${product} that gets it.`, `Everything changed when I started using ${brand}.`],
+      characterStory: `Taylor is a respected voice in the ${product} space, known for honest reviews and high-quality production.`,
+      viralityExplanation: `Taylor has a high trust score with ${audience}, ensuring rapid adoption of ${brand}.`
     };
     case 'generate-video-plan': return { 
       ...common, 
       scenes: [
-        { sceneNumber: 1, duration: "3s", visual: "Close up of shoes hitting pavement with electric sparks", audio: "Heavy breathing, rhythmic thumping", cameraAngle: "Ultra-low ground level" }, 
-        { sceneNumber: 2, duration: "5s", visual: "Wide shot of athlete at sunrise on a skyscraper roof", audio: "Inspirational synth pad swelling", cameraAngle: "Cinematic drone orbit" }
+        { sceneNumber: 1, duration: "3s", visual: `Close up of ${product} in action`, audio: "Dynamic ambient soundscape", cameraAngle: "Close-up / Detail" }, 
+        { sceneNumber: 2, duration: "5s", visual: `Satisfied user (${audience}) interacting with the brand`, audio: "Upbeat inspirational track", cameraAngle: "Medium shot" }
       ], 
       script: common.adScript, 
-      musicStyle: "High-BPM Cinematic Trap with industrial accents", 
-      editingStyle: "Fast-paced rhythmic glitch cuts matching the beat",
-      captionsText: "[BEAT DROPS] UNLEASH YOUR POTENTIAL. [CUT TO LOGO] NIKE: THE FUTURE IS NOW.",
-      runwayPrompt: "Cinematic close-up of a futuristic running shoe with neon accents, ultra-realistic, 8k, slow motion, city lights bokeh.",
-      pikaPrompt: "Athlete sprinting through a neon-lit tunnel, motion blur, dramatic lighting, high energy.",
-      heygen_prompt: "Welcome to the future of performance. These shoes aren't just gear; they're your evolution.",
-      thumbnailPrompt: "Close-up of a glowing Nike shoe on a dark background, high contrast, text: 'THE EVOLUTION' in bold yellow.",
+      musicStyle: "Modern Cinematic Ambient with driving percussion", 
+      editingStyle: "Clean, rhythmic cuts with smooth transitions",
+      captionsText: `[DYNAMIC MUSIC] DISCOVER ${brand.toUpperCase()}. [CUT TO LOGO] THE FUTURE IS HERE.`,
+      runwayPrompt: `Cinematic close-up of ${product}, ultra-realistic, 8k, slow motion, elegant lighting, professional studio setup.`,
+      pikaPrompt: `Person representing ${audience} using ${product} in a modern environment, dramatic lighting, high quality.`,
+      heygen_prompt: `Welcome to the new standard of ${product}. ${brand} isn't just a choice; it's an upgrade for your lifestyle.`,
+      thumbnailPrompt: `Professional product shot of ${product} on a clean background, high contrast, text: 'THE NEW STANDARD' in bold white.`,
       versions: {
-        tiktokViral: "Fast-paced POV transition focusing on the transformation from casual to pro.",
-        luxuryCinematic: "Slow, sweeping shots emphasizing the premium materials and design.",
-        memeVersion: "A relatable 'before and after' showing the confidence boost from wearing the shoes."
+        tiktokViral: "Fast-paced POV showing the immediate benefit of the brand.",
+        luxuryCinematic: "Slow, sweeping shots highlighting premium quality.",
+        educational: "Breakdown of the top 3 features that matter to the audience."
       }
     };
     case 'generate-brand': return { 
       ...common, 
-      tagline: "Unleash Your Potential", 
-      brandArchetype: "The Hero", 
-      brandVoice: "Bold, inspirational, and unapologetically energetic, using punchy, direct language.", 
-      colorPalette: [{ name: "Volt Green", hex: "#CEFF00" }, { name: "Deep Obsidian", hex: "#111111" }, { name: "Flash Crimson", hex: "#FF0055" }], 
-      fontPairings: ["Heading: Futura Extra Bold", "Body: Inter Tight"], 
-      moodboardKeywords: ["Speed", "Energy", "Grit", "Victory", "Neon"],
-      logoConceptDescription: "A minimalist swoosh combined with an abstract lightning bolt, representing the fusion of legacy and speed.",
-      aestheticDirection: "Cyber-Athletic Minimalist: Sharp lines, high contrast, and vibrant neon accents against dark obsidian backgrounds."
+      tagline: "The New Standard", 
+      brandArchetype: "The Explorer", 
+      brandVoice: "Confident, clear, and forward-thinking, using sophisticated yet accessible language.", 
+      colorPalette: [{ name: "Modern Slate", hex: "#2D3436" }, { name: "Pure White", hex: "#FFFFFF" }, { name: "Electric Accent", hex: "#0984E3" }], 
+      fontPairings: ["Heading: Plus Jakarta Sans", "Body: Inter"], 
+      moodboardKeywords: ["Innovation", "Clarity", "Growth", "Quality", "Future"],
+      logoConceptDescription: `A geometric emblem representing the core values of ${brand}, balanced and modern.`,
+      aestheticDirection: "Modern Professional: Clean layouts, generous white space, and high-quality photography."
     };
     case 'trend-stealer': return { 
       ...common, 
       currentTrends: [
-        { trend: "AI Athletics", platform: "TikTok", virality: "Explosive", howToUse: "Use AI filters to show future performance and results" },
-        { trend: "Midnight Run Clubs", platform: "Instagram", virality: "High", howToUse: "Host exclusive midnight runs and capture with low-light cinematic reels" }
+        { trend: "Silent Luxury", platform: "TikTok", virality: "High", howToUse: `Emphasize the understated quality of ${product}` },
+        { trend: "Daily Rituals", platform: "Instagram", virality: "Stable", howToUse: `Show how ${brand} fits into the user's everyday routine` }
       ], 
-      trendHooks: ["How AI is changing your recovery game", "The midnight secret to peak performance", "Stop running like it's 2024"], 
-      adaptedCampaign: `A nocturnal, tech-driven campaign focusing on the 'After Hours' athlete who uses AI to gain an edge.`,
-      viralFormula: "Combining the 'secret club' aesthetic of midnight runs with the curiosity of AI performance data.",
-      timingAdvice: "Post between 9 PM and 11 PM to target the night-owl athlete demographic.",
-      hashtagStrategy: "Use a mix of ultra-niche tech tags and broad athletic tags to bridge the gap between lifestyle and performance.",
-      hashtags: ["#MidnightAthlete", "#AIPerformance", "#NikeNextGen", "#SpeedEvolution", "#ActiveNightLife"]
+      trendHooks: [`How ${brand} is redefining ${product}`, `The secret ritual of ${audience}`, `Stop doing it the old way`], 
+      adaptedCampaign: `A lifestyle-centric campaign focusing on the seamless integration of ${brand} into the user's life.`,
+      viralFormula: "Combining high-value educational content with visually satisfying product demonstrations.",
+      timingAdvice: "Post during peak engagement hours for the specific target demographic.",
+      hashtagStrategy: "Use a mix of industry-standard tags and unique brand-specific identifiers.",
+      hashtags: [`#${brand.replace(/\s+/g, '')}`, `#${product.replace(/\s+/g, '')}`, "#Innovation", "#ModernLiving", "#QualityFirst"]
     };
     default: return common;
   }

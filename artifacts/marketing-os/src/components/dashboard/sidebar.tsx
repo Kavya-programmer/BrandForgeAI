@@ -123,7 +123,7 @@ export function Sidebar({
             name="brand"
             value={formData.brand}
             onChange={handleInputChange}
-            placeholder="e.g. Nike, Glossier, Arc..."
+            placeholder="e.g. Acme Corp, TechLaunch, ZenBase..."
             className="h-10 bg-secondary border-0 focus-visible:ring-1 focus-visible:ring-primary/40 text-sm placeholder:text-muted-foreground/50"
           />
         </FormField>

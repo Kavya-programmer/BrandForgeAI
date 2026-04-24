@@ -233,6 +233,24 @@ export function normalizeBulletPoints(v: any): string {
   return "• High-impact rollout\n• Targeted engagement\n• Conversion-led strategy";
 }
 
+/* ---------------- VALIDATION ---------------- */
+
+export function containsForbidden(data: any, brand: string, product: string, audience: string): boolean {
+  if (!data) return false;
+  const forbidden = ["nike", "shoes", "adidas", "teen audience"];
+  const str = JSON.stringify(data).toLowerCase();
+  
+  const b = brand.toLowerCase();
+  const p = product.toLowerCase();
+  const a = audience.toLowerCase();
+
+  return forbidden.some(word => {
+    // Only flag if the word appears but wasn't in the input
+    const isActuallyInInput = b.includes(word) || p.includes(word) || a.includes(word);
+    return str.includes(word) && !isActuallyInInput;
+  });
+}
+
 /* ---------------- UNIFY RESPONSE ---------------- */
 
 export function unifyResponse(data: any, brand: string, product: string, audience: string, theme: string): CampaignResponse {

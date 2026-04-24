@@ -3,7 +3,8 @@ import {
   getGroqClient,
   callGroqJSON,
   getThemeLabel,
-  unifyResponse
+  unifyResponse,
+  containsForbidden
 } from "../../src/lib/campaign-logic.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -16,11 +17,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    const { brand = "Brand", product = "Product", audience = "Audience", theme = "luxury" } = req.body || {};
+    const { brand = "", product = "", audience = "", theme = "luxury" } = req.body || {};
+    
+    if (!brand || !product) {
+      return res.status(400).json({ error: true, message: "Brand and Product are required." });
+    }
+
     const themeLabel = getThemeLabel(theme);
     const client = getGroqClient();
 
-    const systemPrompt = "You are an expert video director. Return ONLY valid JSON. Every field is MANDATORY. No placeholders.";
+    const systemPrompt = `You are an expert video director. 
+STRICT RULES:
+1. Return ONLY a valid JSON object. 
+2. Do NOT use any prior examples, unrelated brands, or legacy data (e.g., Nike, shoes, or generic teen audiences) unless specifically provided in the input.
+3. All output MUST strictly align with the provided brand input: "${brand}".
+4. No conversational text. No markdown.`;
+
     const userPrompt = `Create a detailed video production plan for:
 Brand: ${brand}
 Product: ${product}
@@ -39,9 +51,15 @@ You MUST return these fields in JSON:
 9. thumbnailPrompt (Prompt for a YouTube/TikTok thumbnail image)
 10. versions (Object with keys: 'tiktokViral', 'luxuryCinematic', 'memeVersion' - each value is a description of how to adapt the video)
 
-CRITICAL: NO 'pending'. All prompts must be descriptive and ready to use.`;
+CRITICAL: If the brand is "${brand}", the output must NOT mention any other brands like Nike, Adidas, or unrelated industries.`;
 
     let data = await callGroqJSON<any>(client, systemPrompt, userPrompt);
+
+    // Hard Validation: Check for context contamination
+    if (data && containsForbidden(data, brand, product, audience)) {
+      console.warn("Context contamination detected in generate-video-plan.ts, retrying with stricter prompt...");
+      data = await callGroqJSON<any>(client, systemPrompt + "\nSTRICT: You previously mentioned unrelated brands or industries. RECTIFY THIS. ONLY use the provided brand details.", userPrompt);
+    }
 
     // Validation
     if (data && (data.captionsText === "pending" || !data.captionsText || !Array.isArray(data.scenes))) {
@@ -49,10 +67,10 @@ CRITICAL: NO 'pending'. All prompts must be descriptive and ready to use.`;
       data = await callGroqJSON<any>(client, systemPrompt, userPrompt + "\nRETRY: Ensure captionsText is fully written and scenes is a complete array.");
     }
 
-    if (!data) {
+    if (!data || (data && containsForbidden(data, brand, product, audience))) {
       return res.status(200).json({
         error: true,
-        message: "Video plan generation failed.",
+        message: "Video plan generation produced unrelated content. Please try again with more specific inputs.",
         data: null
       });
     }

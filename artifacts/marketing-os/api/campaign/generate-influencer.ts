@@ -4,7 +4,8 @@ import {
   callGroqJSON,
   getThemeLabel,
   CURATED_INFLUENCERS,
-  unifyResponse
+  unifyResponse,
+  containsForbidden
 } from "../../src/lib/campaign-logic.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -17,11 +18,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    const { brand = "Brand", product = "Product", audience = "Audience", theme = "luxury" } = req.body || {};
+    const { brand = "", product = "", audience = "", theme = "luxury" } = req.body || {};
+    
+    if (!brand || !product) {
+      return res.status(400).json({ error: true, message: "Brand and Product are required." });
+    }
+
     const themeLabel = getThemeLabel(theme);
     const client = getGroqClient();
 
-    const systemPrompt = "You are an influencer marketing specialist. Return ONLY a valid JSON object. No conversational text. No markdown. No headings outside the JSON object.";
+    const systemPrompt = `You are an influencer marketing specialist. 
+STRICT RULES:
+1. Return ONLY a valid JSON object. 
+2. Do NOT use any prior examples, unrelated brands, or legacy data (e.g., Nike, shoes, or generic teen audiences) unless specifically provided in the input.
+3. All output MUST strictly align with the provided brand input: "${brand}".
+4. No conversational text. No markdown.`;
+
     const userPrompt = `Select and develop an influencer persona for:
 Brand: ${brand}
 Product: ${product}
@@ -50,12 +62,15 @@ You MUST return exactly this JSON structure:
   "viralityExplanation": "Why they will drive views"
 }
 
-CRITICAL RULES:
-1. Output MUST be valid JSON only.
-2. Do NOT include headings or text outside the JSON.
-3. All content must be production-ready.`;
+CRITICAL: If the brand is "${brand}", the output must NOT mention any other brands like Nike, Adidas, or unrelated industries.`;
 
     let data = await callGroqJSON<any>(client, systemPrompt, userPrompt);
+
+    // Hard Validation: Check for context contamination
+    if (data && containsForbidden(data, brand, product, audience)) {
+      console.warn("Context contamination detected in generate-influencer.ts, retrying with stricter prompt...");
+      data = await callGroqJSON<any>(client, systemPrompt + "\nSTRICT: You previously mentioned unrelated brands or industries. RECTIFY THIS. ONLY use the provided brand details.", userPrompt);
+    }
 
     // Validation
     if (data && (data.characterStory === "pending" || !data.characterStory || !Array.isArray(data.collaborationIdeas))) {
@@ -63,10 +78,10 @@ CRITICAL RULES:
       data = await callGroqJSON<any>(client, systemPrompt, userPrompt + "\nRETRY: Ensure characterStory is a full paragraph and collaborationIdeas is an array.");
     }
 
-    if (!data) {
+    if (!data || (data && containsForbidden(data, brand, product, audience))) {
       return res.status(200).json({
         error: true,
-        message: "Influencer matching failed.",
+        message: "Influencer generation produced unrelated content. Please try again with more specific inputs.",
         data: null
       });
     }
