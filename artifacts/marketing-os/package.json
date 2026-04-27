@@ -12,6 +12,7 @@
     "test:smoke": "node test-smoke.js"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "@vercel/node": "^5.7.13",
     "groq-sdk": "^1.1.2"
   },
